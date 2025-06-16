@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数智之眼 - 数据资产中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1890ff',
+                        'primary-light': '#40a9ff',
+                        'primary-dark': '#096dd9',
+                        success: '#52c41a',
+                        warning: '#faad14',
+                        error: '#ff4d4f',
+                        'text-primary': '#262626',
+                        'text-secondary': '#595959',
+                        'text-tertiary': '#8c8c8c',
+                        'bg-secondary': '#fafafa',
+                        'bg-tertiary': '#f5f5f5',
+                        'border-primary': '#d9d9d9',
+                        'border-secondary': '#e8e8e8'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-collapsed { width: 80px; }
+        .sidebar-expanded { width: 240px; }
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .card-hover:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+            transition: all 0.3s ease;
+        }
+        .tree-item:hover {
+            background-color: #f0f9ff;
+            border-radius: 4px;
+        }
+        .tree-item.active {
+            background-color: #e6f7ff;
+            color: #1890ff;
+            font-weight: 500;
+        }
+        .asset-tag {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .tag-core { background-color: #ff4d4f; color: white; }
+        .tag-important { background-color: #faad14; color: white; }
+        .tag-normal { background-color: #d9d9d9; color: #666; }
+        .quality-score {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .quality-high { background-color: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .quality-medium { background-color: #fff7e6; color: #faad14; border: 1px solid #ffd591; }
+        .quality-low { background-color: #fff2f0; color: #ff4d4f; border: 1px solid #ffb3b3; }
+        .breadcrumb-divider::after {
+            content: '/';
+            margin: 0 8px;
+            color: #d0d7de;
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e6e6e6 50%, #f0f0f0 75%);
+            background-size: 400% 100%;
+            animation: loading 1.4s ease infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50 h-16">
+        <div class="flex items-center justify-between h-full px-6">
+            <!-- Logo区域 -->
+            <div class="flex items-center space-x-4">
+                <button id="sidebarToggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-eye text-white text-sm"></i>
+                    </div>
+                    <span class="text-xl font-semibold text-gray-800">数智之眼</span>
+                </div>
+            </div>
+
+            <!-- 中间：全局搜索框 -->
+            <div class="flex-1 max-w-xl mx-4 hidden md:block">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        placeholder="搜索数据资产、表名、字段..." 
+                        class="w-full px-4 py-2 pl-10 pr-4 text-sm border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white"
+                    >
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- 右侧：快捷功能和用户信息 -->
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <!-- 移动端搜索按钮 -->
+                <button class="md:hidden p-2 text-gray-600 hover:text-primary">
+                    <i class="fas fa-search text-lg"></i>
+                </button>
+                
+                <!-- 帮助文档 -->
+                <button class="p-2 text-gray-600 hover:text-primary transition-colors">
+                    <i class="fas fa-question-circle text-lg"></i>
+                </button>
+                
+                <!-- 消息通知 -->
+                <button class="p-2 text-gray-600 hover:text-primary transition-colors relative">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                </button>
+
+                <!-- 用户信息 -->
+                <div class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 px-2 md:px-3 py-2 rounded-lg transition-colors">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm font-medium">张</span>
+                    </div>
+                    <span class="text-gray-800 font-medium hidden sm:block">张三</span>
+                    <i class="fas fa-chevron-down text-gray-400 text-sm hidden sm:block"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- 左侧菜单栏 -->
+        <aside id="sidebar" class="sidebar-expanded bg-white border-r border-gray-200 fixed left-0 top-16 bottom-0 z-40 transition-all duration-300">
+            <nav class="p-4 space-y-2">
+                <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-tachometer-alt w-5"></i>
+                    <span class="sidebar-text">首页仪表盘</span>
+                </a>
+                <a href="data_map.html" class="flex items-center space-x-3 px-3 py-2 bg-primary text-white rounded-lg">
+                    <i class="fas fa-database w-5"></i>
+                    <span class="sidebar-text">数据资产中心</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-chart-bar w-5"></i>
+                    <span class="sidebar-text">统计与报表</span>
+                    <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-exclamation-triangle w-5"></i>
+                    <span class="sidebar-text">监控与告警</span>
+                    <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-cog w-5"></i>
+                    <span class="sidebar-text">系统管理</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main id="mainContent" class="flex-1 ml-60 transition-all duration-300">
+            <div class="p-6">
+                <!-- 面包屑导航 -->
+                <nav class="flex items-center text-sm text-gray-500 mb-4">
+                    <i class="fas fa-home mr-2"></i>
+                    <span class="breadcrumb-divider">数据资产中心</span>
+                    <span>资产地图</span>
+                </nav>
+
+                <!-- 页面标题 -->
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">数据资产中心</h1>
+                        <p class="text-gray-600 mt-1">统一管理和查看企业数据资产</p>
+                    </div>
+                    <!-- <div class="flex items-center space-x-3">
+                        <button class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+                            <i class="fas fa-filter mr-2"></i>高级筛选
+                        </button>
+                        <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">
+                            <i class="fas fa-plus mr-2"></i>新建资产
+                        </button>
+                    </div> -->
+                </div>
+
+                <div class="flex space-x-6">
+                    <!-- 左侧：资产目录树 -->
+                    <div class="w-80 bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                <i class="fas fa-sitemap mr-2 text-primary"></i>
+                                数据资产地图
+                            </h3>
+                            <!-- <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-sync-alt"></i>
+                            </button> -->
+                        </div>
+
+                        <!-- 主域筛选 -->
+                        <div class="mb-4">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <i class="fas fa-tags text-primary"></i>
+                                <span class="font-medium text-gray-700">主域筛选(211)</span>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="tree-item active px-3 py-2 cursor-pointer">
+                                    <i class="fas fa-folder-open text-primary mr-2"></i>
+                                    <span>全部主域</span>
+                                    <span class="text-xs text-gray-500 ml-auto">(211)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 目录树 -->
+                        <div class="space-y-1">
+                            <!-- 前台 -->
+                            <div class="tree-item px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                <i class="fas fa-chevron-down text-gray-400 mr-1 transition-transform"></i>
+                                <i class="fas fa-folder text-blue-500 mr-2"></i>
+                                <span>前台</span>
+                            </div>
+                            <div class="ml-6 space-y-1">
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>风控</span>
+                                </div>
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>权权</span>
+                                </div>
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>交易域</span>
+                                </div>
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>活动</span>
+                                </div>
+                            </div>
+
+                            <!-- 客户中心 -->
+                            <div class="tree-item px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                <i class="fas fa-chevron-right text-gray-400 mr-1 transition-transform"></i>
+                                <i class="fas fa-folder text-blue-500 mr-2"></i>
+                                <span>客户中心</span>
+                            </div>
+
+                            <!-- 数据集管 -->
+                            <div class="tree-item px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                <i class="fas fa-chevron-down text-gray-400 mr-1 transition-transform"></i>
+                                <i class="fas fa-folder text-blue-500 mr-2"></i>
+                                <span>数据集管</span>
+                            </div>
+                            <div class="ml-6 space-y-1">
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>运筹支管</span>
+                                </div>
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>治理系统</span>
+                                </div>
+                            </div>
+
+                            <!-- 元数据管理 -->
+                            <div class="tree-item active px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                <i class="fas fa-chevron-down text-primary mr-1 transition-transform"></i>
+                                <i class="fas fa-folder-open text-primary mr-2"></i>
+                                <span>元数据管理</span>
+                            </div>
+                            <div class="ml-6 space-y-1">
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>元数据注册</span>
+                                </div>
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>血缘链路</span>
+                                </div>
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>组织架构管理</span>
+                                </div>
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>人才招聘</span>
+                                </div>
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>员工管理</span>
+                                </div>
+                                <div class="tree-item active px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-primary mr-2"></i>
+                                    <span>数据管理</span>
+                                </div>
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>薪资</span>
+                                </div>
+                                <div class="tree-item px-3 py-1 cursor-pointer text-sm">
+                                    <i class="fas fa-table text-green-500 mr-2"></i>
+                                    <span>部门</span>
+                                </div>
+                            </div>
+
+                            <!-- 物理结构 -->
+                            <div class="tree-item px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                <i class="fas fa-chevron-right text-gray-400 mr-1 transition-transform"></i>
+                                <i class="fas fa-folder text-blue-500 mr-2"></i>
+                                <span>物理结构</span>
+                            </div>
+
+                            <!-- 机器配置 -->
+                            <div class="tree-item px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                <i class="fas fa-chevron-right text-gray-400 mr-1 transition-transform"></i>
+                                <i class="fas fa-folder text-blue-500 mr-2"></i>
+                                <span>机器配置</span>
+                            </div>
+
+                            <!-- 智能推荐 -->
+                            <div class="tree-item px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                <i class="fas fa-chevron-right text-gray-400 mr-1 transition-transform"></i>
+                                <i class="fas fa-folder text-blue-500 mr-2"></i>
+                                <span>智能推荐</span>
+                            </div>
+
+                            <!-- 数据监控 -->
+                            <div class="tree-item px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                <i class="fas fa-chevron-right text-gray-400 mr-1 transition-transform"></i>
+                                <i class="fas fa-folder text-blue-500 mr-2"></i>
+                                <span>数据监控</span>
+                            </div>
+
+                            <!-- 外部集成 -->
+                            <div class="tree-item px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                <i class="fas fa-chevron-right text-gray-400 mr-1 transition-transform"></i>
+                                <i class="fas fa-folder text-blue-500 mr-2"></i>
+                                <span>外部集成</span>
+                            </div>
+
+                            <!-- 数据外泄 -->
+                            <div class="tree-item px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                <i class="fas fa-chevron-right text-gray-400 mr-1 transition-transform"></i>
+                                <i class="fas fa-folder text-blue-500 mr-2"></i>
+                                <span>数据外泄</span>
+                            </div>
+
+                            <!-- 文档管理 -->
+                            <div class="tree-item px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                <i class="fas fa-chevron-right text-gray-400 mr-1 transition-transform"></i>
+                                <i class="fas fa-folder text-blue-500 mr-2"></i>
+                                <span>文档管理</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：主要内容区域 -->
+                    <div class="flex-1 bg-white rounded-xl card-shadow">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                    <i class="fas fa-globe text-primary mr-2"></i>
+                                    全部主域
+                                </h3>
+                                <!-- <div class="flex items-center space-x-3">
+                                    <span class="text-sm text-gray-500">请选择你关心的</span>
+                                    <input type="text" placeholder="搜索" class="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary">
+                                </div> -->
+                            </div>
+
+                            <!-- 数据源标签 -->
+                            <div class="mb-4">
+                                <div class="text-sm text-gray-600 mb-2">数据连接类型:</div>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-primary text-white text-sm rounded-full cursor-pointer">Hive</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">MySQL</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">Vertica</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">Greenplum</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">Oracle</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">DM</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">StarRocks</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">GaussDB</span>
+                                </div>
+                            </div>
+
+                            <!-- 数据层级标签 -->
+                            <div class="mb-4">
+                                <div class="text-sm text-gray-600 mb-2">数据层级:</div>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-primary text-white text-sm rounded-full cursor-pointer">全部</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">dim</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">map</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">dwd</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">dws</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">ads</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">ods</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">ywods</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">ywdwd</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">ywdws</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">ywads</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">ywdm</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full cursor-pointer hover:bg-gray-200">app</span>
+                                </div>
+                            </div>
+
+                            <!-- 详细主题分类 -->
+                            <div class="mb-6">
+                                <div class="text-sm text-gray-600 mb-2">详细主题:</div>
+                                <div class="flex flex-wrap gap-2 text-sm">
+                                    <span class="px-3 py-1 bg-primary text-white rounded-full cursor-pointer">全部</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">客户</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">权权</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">交易域</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">活动</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">运筹支管</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">治理系统</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">主要系统</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">人才招聘</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">员工管理</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">数据管理</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">薪资</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">部门</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">大数据运营管理</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">生产</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">主体数据管理</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">供应链</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-fl cursor-pointer hover:bg-gray-200">API系统</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full cursor-pointer hover:bg-gray-200">供应链链</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 资产列表 -->
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-600">显示数据:</span>
+                                    <button class="px-3 py-1 bg-primary text-white text-sm rounded">导出</button>
+                                    <button class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded hover:bg-gray-200">重置</button>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-500">共 234 条</span>
+                                    <select class="text-sm border border-gray-300 rounded px-2 py-1">
+                                        <option>20条/页</option>
+                                        <option>50条/页</option>
+                                        <option>100条/页</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 表格 -->
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 border-b">
+                                        <tr class="text-left text-sm text-gray-600">
+                                            <th class="px-4 py-3 font-medium">#</th>
+                                            <th class="px-4 py-3 font-medium">库表名称 <i class="fas fa-info-circle text-gray-400 ml-1"></i></th>
+                                            <th class="px-4 py-3 font-medium">技术负责人</th>
+                                            <th class="px-4 py-3 font-medium">数据标签</th>
+                                            <th class="px-4 py-3 font-medium">注释</th>
+                                            <th class="px-4 py-3 font-medium">数据分层</th>
+                                            <th class="px-4 py-3 font-medium">主题归属</th>
+                                            <th class="px-4 py-3 font-medium">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <!-- 第1行 -->
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-4 py-4 text-sm">1</td>
+                                            <td class="px-4 py-4">
+                                                <div class="flex items-center space-x-2">
+                                                    <i class="fas fa-table text-green-500"></i>
+                                                    <div>
+                                                        <div class="font-medium text-gray-900">mammut_user.dim_mammut_ip_practice</div>
+                                                        <div class="text-sm text-gray-500">& user_drc</div>
+                                                    </div>
+                                                    <span class="asset-tag tag-core">核</span>
+                                                    <span class="asset-tag tag-important">重</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-4 text-sm">qifeng.wu</td>
+                                            <td class="px-4 py-4 text-sm">practice用户凭证</td>
+                                            <td class="px-4 py-4 text-sm">user_code</td>
+                                            <td class="px-4 py-4 text-sm">dim</td>
+                                            <td class="px-4 py-4 text-sm">主要系统/登录人员</td>
+                                            <td class="px-4 py-4">
+                                                <button class="text-primary hover:text-primary-dark text-sm" onclick="window.location.href='data_detail2.html'">查看详情</button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- 第2行 -->
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-4 py-4 text-sm">2</td>
+                                            <td class="px-4 py-4">
+                                                <div class="flex items-center space-x-2">
+                                                    <i class="fas fa-table text-green-500"></i>
+                                                    <div>
+                                                        <div class="font-medium text-gray-900">bdims.dim_practice_user_doc_info</div>
+                                                    </div>
+                                                    <span class="asset-tag tag-important">重</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-4 text-sm">huangfei2</td>
+                                            <td class="px-4 py-4 text-sm">用户档案内容</td>
+                                            <td class="px-4 py-4 text-sm">
+                                                <div>user_id, user_name, age,</div>
+                                                <div class="text-xs text-gray-500">test_modified_date,</div>
+                                                <div class="text-xs text-gray-500">create_date</div>
+                                            </td>
+                                            <td class="px-4 py-4 text-sm">dim</td>
+                                            <td class="px-4 py-4 text-sm">API系统/API数据表</td>
+                                            <td class="px-4 py-4">
+                                                <button class="text-primary hover:text-primary-dark text-sm" onclick="window.location.href='data_detail2.html'">查看详情</button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- 第3行 -->
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-4 py-4 text-sm">3</td>
+                                            <td class="px-4 py-4">
+                                                <div class="flex items-center space-x-2">
+                                                    <i class="fas fa-table text-green-500"></i>
+                                                    <div>
+                                                        <div class="font-medium text-gray-900">bdims.dwd.dm_target_rods_df</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-4 text-sm">看相关</td>
+                                            <td class="px-4 py-4 text-sm">今天用户</td>
+                                            <td class="px-4 py-4 text-sm">-</td>
+                                            <td class="px-4 py-4 text-sm">ywdwd</td>
+                                            <td class="px-4 py-4 text-sm">数据管理/甲性系统</td>
+                                            <td class="px-4 py-4">
+                                                <button class="text-primary hover:text-primary-dark text-sm" onclick="window.location.href='data_detail2.html'">查看详情</button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- 第4行 -->
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-4 py-4 text-sm">4</td>
+                                            <td class="px-4 py-4">
+                                                <div class="flex items-center space-x-2">
+                                                    <i class="fas fa-table text-green-500"></i>
+                                                    <div>
+                                                        <div class="font-medium text-gray-900">mammut_user.dwd.mingui_o4</div>
+                                                    </div>
+                                                    <span class="asset-tag tag-important">重</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-4 text-sm">产经核</td>
+                                            <td class="px-4 py-4 text-sm">数据原始</td>
+                                            <td class="px-4 py-4 text-sm">id</td>
+                                            <td class="px-4 py-4 text-sm">dwd</td>
+                                            <td class="px-4 py-4 text-sm">
+                                                <div>员工管理/人员</div>
+                                                <div class="text-xs text-gray-500">员工管理/详情明</div>
+                                            </td>
+                                            <td class="px-4 py-4">
+                                                <button class="text-primary hover:text-primary-dark text-sm" onclick="window.location.href='data_detail2.html'">查看详情</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- 分页 -->
+                            <div class="flex items-center justify-between mt-6">
+                                <div class="text-sm text-gray-500">
+                                    显示第 1-20 条，共 234 条记录
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50">
+                                        <i class="fas fa-chevron-left mr-1"></i>上一页
+                                    </button>
+                                    <button class="px-3 py-1 bg-primary text-white text-sm rounded">1</button>
+                                    <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50">2</button>
+                                    <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50">3</button>
+                                    <span class="px-2 text-sm text-gray-500">...</span>
+                                    <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50">12</button>
+                                    <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50">
+                                        下一页<i class="fas fa-chevron-right ml-1"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 切换树节点
+        function toggleTreeNode(element) {
+            const icon = element.querySelector('.fa-chevron-right, .fa-chevron-down');
+            const nextSibling = element.nextElementSibling;
+            
+            if (icon.classList.contains('fa-chevron-right')) {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-down');
+                if (nextSibling && nextSibling.classList.contains('ml-6')) {
+                    nextSibling.style.display = 'block';
+                }
+            } else {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-right');
+                if (nextSibling && nextSibling.classList.contains('ml-6')) {
+                    nextSibling.style.display = 'none';
+                }
+            }
+        }
+
+        // 侧边栏折叠功能
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+            
+            if (sidebar.classList.contains('sidebar-expanded')) {
+                sidebar.classList.remove('sidebar-expanded');
+                sidebar.classList.add('sidebar-collapsed');
+                mainContent.style.marginLeft = '80px';
+                sidebarTexts.forEach(text => text.classList.add('hidden'));
+            } else {
+                sidebar.classList.remove('sidebar-collapsed');
+                sidebar.classList.add('sidebar-expanded');
+                mainContent.style.marginLeft = '240px';
+                sidebarTexts.forEach(text => text.classList.remove('hidden'));
+            }
+        });
+
+        // 移动端菜单控制
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', toggleSidebar);
+
+        // 标签点击事件
+        document.addEventListener('DOMContentLoaded', function() {
+            // 数据源标签点击
+            const dataSourceTags = document.querySelectorAll('.rounded-full');
+            dataSourceTags.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    // 移除其他标签的激活状态
+                    dataSourceTags.forEach(t => {
+                        if (t.closest('.flex.flex-wrap') === this.closest('.flex.flex-wrap')) {
+                            t.classList.remove('bg-primary', 'text-white');
+                            t.classList.add('bg-gray-100', 'text-gray-600');
+                        }
+                    });
+                    // 激活当前标签
+                    this.classList.remove('bg-gray-100', 'text-gray-600');
+                    this.classList.add('bg-primary', 'text-white');
+                    
+                    console.log('选择标签:', this.textContent);
+                    // 这里可以添加筛选逻辑
+                });
+            });
+
+            // 表格行点击跳转到详情页
+            const tableRows = document.querySelectorAll('tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('click', function() {
+                    const tableName = this.querySelector('.font-medium').textContent;
+                    console.log('查看表详情:', tableName);
+                    // 这里可以添加跳转到详情页的逻辑
+                    // window.location.href = `/asset-detail/${tableName}`;
+                });
+            });
+
+            // 树节点选择
+            const treeItems = document.querySelectorAll('.tree-item');
+            treeItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (!e.target.closest('.fa-chevron-right, .fa-chevron-down')) {
+                        // 移除其他项的激活状态
+                        treeItems.forEach(t => {
+                            t.classList.remove('active');
+                        });
+                        // 激活当前项
+                        this.classList.add('active');
+                        
+                        const itemName = this.querySelector('span:last-child').textContent;
+                        console.log('选择目录项:', itemName);
+                        // 这里可以添加筛选逻辑
+                    }
+                });
+            });
+
+            // 响应式处理
+            function handleResize() {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                
+                if (window.innerWidth < 1024) {
+                    sidebar.classList.remove('sidebar-expanded');
+                    sidebar.classList.add('sidebar-collapsed');
+                    mainContent.classList.remove('ml-60');
+                    mainContent.classList.add('ml-20');
+                    document.querySelectorAll('.sidebar-text').forEach(text => text.style.display = 'none');
+                }
+            }
+            
+            window.addEventListener('resize', handleResize);
+            handleResize();
+        });
+    </script>
+</body>
+</html>

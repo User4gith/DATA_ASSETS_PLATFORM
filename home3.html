@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数智之眼 - 首页仪表盘</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1890ff',
+                        'primary-light': '#40a9ff',
+                        'primary-dark': '#096dd9',
+                        success: '#52c41a',
+                        warning: '#faad14',
+                        error: '#ff4d4f',
+                        'text-primary': '#262626',
+                        'text-secondary': '#595959',
+                        'text-tertiary': '#8c8c8c',
+                        'bg-secondary': '#fafafa',
+                        'bg-tertiary': '#f5f5f5',
+                        'border-primary': '#d9d9d9',
+                        'border-secondary': '#e8e8e8'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-collapsed { width: 80px; }
+        .sidebar-expanded { width: 240px; }
+        .trend-up { color: #52c41a; }
+        .trend-down { color: #ff4d4f; }
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .card-hover:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        .metric-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .metric-card-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .metric-card-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .metric-card-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .metric-card-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .metric-card-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e6e6e6 50%, #f0f0f0 75%);
+            background-size: 400% 100%;
+            animation: loading 1.4s ease infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50 h-16">
+        <div class="flex items-center justify-between h-full px-6">
+            <!-- 左侧：Logo和产品名称 -->
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-eye text-white text-lg"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800 hidden sm:block">数智之眼</span>
+                </div>
+                
+                <!-- 移动端菜单按钮 -->
+                <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-600 hover:text-primary">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+            </div>
+
+            <!-- 中间：全局搜索框 -->
+            <div class="flex-1 max-w-xl mx-4 hidden md:block">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        placeholder="搜索数据资产、表名、字段..." 
+                        class="w-full px-4 py-2 pl-10 pr-4 text-sm border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white"
+                    >
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- 右侧：快捷功能和用户信息 -->
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <!-- 移动端搜索按钮 -->
+                <button class="md:hidden p-2 text-gray-600 hover:text-primary">
+                    <i class="fas fa-search text-lg"></i>
+                </button>
+                
+                <!-- 帮助文档 -->
+                <button class="p-2 text-gray-600 hover:text-primary transition-colors">
+                    <i class="fas fa-question-circle text-lg"></i>
+                </button>
+                
+                <!-- 消息通知 -->
+                <button class="p-2 text-gray-600 hover:text-primary transition-colors relative">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                </button>
+
+                <!-- 用户信息 -->
+                <div class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 px-2 md:px-3 py-2 rounded-lg transition-colors">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm font-medium">张</span>
+                    </div>
+                    <span class="text-gray-800 font-medium hidden sm:block">张三</span>
+                    <i class="fas fa-chevron-down text-gray-400 text-sm hidden sm:block"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- 左侧菜单栏 -->
+        <aside id="sidebar" class="sidebar-expanded bg-white border-r border-gray-200 fixed left-0 top-16 bottom-0 z-40 transition-all duration-300">
+            <nav class="p-4 space-y-2">
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 bg-primary text-white rounded-lg">
+                    <i class="fas fa-tachometer-alt w-5"></i>
+                    <span class="sidebar-text">首页仪表盘</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-database w-5"></i>
+                    <span class="sidebar-text">数据资产中心</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-chart-bar w-5"></i>
+                    <span class="sidebar-text">统计与报表</span>
+                    <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-exclamation-triangle w-5"></i>
+                    <span class="sidebar-text">监控与告警</span>
+                    <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-cog w-5"></i>
+                    <span class="sidebar-text">系统管理</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main id="mainContent" class="flex-1 ml-60 transition-all duration-300">
+            <div class="p-6">
+                <!-- 面包屑导航 -->
+                <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+                    <i class="fas fa-home"></i>
+                    <span>首页仪表盘</span>
+                </nav>
+
+                <!-- 页面标题 -->
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">首页仪表盘</h1>
+                        <p class="text-gray-600 mt-1">欢迎回来，张三！ 今天是 2025年6月13日</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+                            <i class="fas fa-download mr-2"></i>导出报告
+                        </button>
+                        <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">
+                            <i class="fas fa-cog mr-2"></i>自定义布局
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 核心指标卡片区域 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+                    <!-- 数据资产总数 -->
+                    <div class="metric-card text-white rounded-xl p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-3xl font-bold mb-2">1,247</div>
+                                <div class="text-sm opacity-90">数据资产总数</div>
+                            </div>
+                            <i class="fas fa-database text-3xl opacity-80"></i>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>环比上周 +12.5%</span>
+                        </div>
+                    </div>
+
+                    <!-- 核心数据表 -->
+                    <div class="metric-card-2 text-white rounded-xl p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-3xl font-bold mb-2">89</div>
+                                <div class="text-sm opacity-90">核心数据表</div>
+                            </div>
+                            <i class="fas fa-star text-3xl opacity-80"></i>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>环比上周 +3.2%</span>
+                        </div>
+                    </div>
+
+                    <!-- 数据质量平均分 -->
+                    <div class="metric-card-3 text-white rounded-xl p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-3xl font-bold mb-2">8.7</div>
+                                <div class="text-sm opacity-90">数据质量平均分</div>
+                            </div>
+                            <i class="fas fa-shield-alt text-3xl opacity-80"></i>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <i class="fas fa-arrow-down mr-1"></i>
+                            <span>环比上周 -0.3%</span>
+                        </div>
+                    </div>
+
+                    <!-- 活跃用户数 -->
+                    <div class="metric-card-4 text-white rounded-xl p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-3xl font-bold mb-2">234</div>
+                                <div class="text-sm opacity-90">本周活跃用户</div>
+                            </div>
+                            <i class="fas fa-users text-3xl opacity-80"></i>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>环比上周 +18.7%</span>
+                        </div>
+                    </div>
+
+                    <!-- 今日查询次数 -->
+                    <div class="metric-card-5 text-white rounded-xl p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-3xl font-bold mb-2">3.2K</div>
+                                <div class="text-sm opacity-90">今日查询次数</div>
+                            </div>
+                            <i class="fas fa-search text-3xl opacity-80"></i>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>环比昨日 +25.4%</span>
+                        </div>
+                    </div>
+
+                    <!-- 数据存储量 -->
+                    <div class="metric-card-6 text-gray-700 rounded-xl p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-3xl font-bold mb-2">45.6TB</div>
+                                <div class="text-sm opacity-80">总存储量</div>
+                            </div>
+                            <i class="fas fa-hdd text-3xl opacity-60"></i>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <i class="fas fa-arrow-up mr-1 text-success"></i>
+                            <span>环比上周 +5.8%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主要内容区域 -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 左侧区域 -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- 业务主题分布 -->
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800">业务主题分布</h3>
+                                <i class="fas fa-external-link-alt text-gray-400 hover:text-primary cursor-pointer"></i>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 cursor-pointer transition-all">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-semibold text-gray-800">用户数据</div>
+                                            <div class="text-sm text-gray-500 mt-1">总数: 234 | 核心: 45</div>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div class="p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 cursor-pointer transition-all">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-semibold text-gray-800">订单数据</div>
+                                            <div class="text-sm text-gray-500 mt-1">总数: 189 | 核心: 32</div>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div class="p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 cursor-pointer transition-all">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-semibold text-gray-800">商品数据</div>
+                                            <div class="text-sm text-gray-500 mt-1">总数: 156 | 核心: 28</div>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div class="p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 cursor-pointer transition-all">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-semibold text-gray-800">财务数据</div>
+                                            <div class="text-sm text-gray-500 mt-1">总数: 123 | 核心: 25</div>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 我的工作台 -->
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800">我的工作台</h3>
+                                <button class="text-primary text-sm hover:text-primary-dark">查看全部</button>
+                            </div>
+                            
+                            <!-- 标签页 -->
+                            <div class="flex border-b border-gray-200 mb-4">
+                                <button class="px-4 py-2 text-primary border-b-2 border-primary font-medium text-sm">
+                                    待我审批
+                                    <span class="ml-1 bg-error text-white text-xs px-1.5 py-0.5 rounded-full">2</span>
+                                </button>
+                                <button class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm ml-6">
+                                    待我处理
+                                    <span class="ml-1 bg-warning text-white text-xs px-1.5 py-0.5 rounded-full">5</span>
+                                </button>
+                                <button class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm ml-6">
+                                    我的关注
+                                    <span class="ml-1 bg-gray-400 text-white text-xs px-1.5 py-0.5 rounded-full">3</span>
+                                </button>
+                            </div>
+                            
+                            <!-- 任务列表 -->
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-800">李四申请用户行为表查看权限</div>
+                                        <div class="text-xs text-gray-500 mt-1">2小时前</div>
+                                    </div>
+                                    <button class="px-3 py-1 bg-primary text-white text-xs rounded hover:bg-primary-dark">
+                                        审批
+                                    </button>
+                                </div>
+                                <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-800">王五申请订单明细表编辑权限</div>
+                                        <div class="text-xs text-gray-500 mt-1">5小时前</div>
+                                    </div>
+                                    <button class="px-3 py-1 bg-primary text-white text-xs rounded hover:bg-primary-dark">
+                                        审批
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧区域 -->
+                    <div class="space-y-6">
+                        <!-- 我的收藏 & 最近访问 -->
+                        <div class="bg-white rounded-xl card-shadow">
+                            <div class="p-6 border-b border-gray-200">
+                                <h3 class="text-lg font-semibold text-gray-800">快速访问</h3>
+                            </div>
+                            <div class="p-6">
+                                <!-- 标签页 -->
+                                <div class="flex border-b border-gray-200 mb-4">
+                                    <button class="px-4 py-2 text-primary border-b-2 border-primary font-medium text-sm">我的收藏</button>
+                                    <button class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm ml-6">最近访问</button>
+                                </div>
+                                
+                                <!-- 收藏列表 -->
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="flex items-center space-x-3">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-800">用户活跃度周报</div>
+                                                <div class="text-xs text-gray-500">user_activity_weekly</div>
+                                            </div>
+                                        </div>
+                                        <i class="fas fa-external-link-alt text-gray-400"></i>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="flex items-center space-x-3">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-800">销售数据汇总</div>
+                                                <div class="text-xs text-gray-500">sales_summary</div>
+                                            </div>
+                                        </div>
+                                        <i class="fas fa-external-link-alt text-gray-400"></i>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="flex items-center space-x-3">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-800">客户画像分析</div>
+                                                <div class="text-xs text-gray-500">customer_profile</div>
+                                            </div>
+                                        </div>
+                                        <i class="fas fa-external-link-alt text-gray-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 热门资产榜 -->
+                        <div class="bg-white rounded-xl card-shadow">
+                            <div class="p-6 border-b border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-semibold text-gray-800">热门资产榜</h3>
+                                    <select class="text-sm border border-gray-300 rounded px-2 py-1">
+                                        <option>近7天</option>
+                                        <option>近30天</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-3">
+                                    <div class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="w-6 h-6 bg-warning text-white text-xs font-bold rounded flex items-center justify-center">1</div>
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-gray-800">user_behavior_log</div>
+                                            <div class="text-xs text-gray-500">访问次数: 1,234</div>
+                                        </div>
+                                        <i class="fas fa-fire text-warning"></i>
+                                    </div>
+                                    <div class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="w-6 h-6 bg-gray-400 text-white text-xs font-bold rounded flex items-center justify-center">2</div>
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-gray-800">order_detail</div>
+                                            <div class="text-xs text-gray-500">访问次数: 987</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="w-6 h-6 bg-gray-400 text-white text-xs font-bold rounded flex items-center justify-center">3</div>
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-gray-800">product_info</div>
+                                            <div class="text-xs text-gray-500">访问次数: 756</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="w-6 h-6 bg-gray-400 text-white text-xs font-bold rounded flex items-center justify-center">4</div>
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-gray-800">user_profile</div>
+                                            <div class="text-xs text-gray-500">访问次数: 623</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="w-6 h-6 bg-gray-400 text-white text-xs font-bold rounded flex items-center justify-center">5</div>
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-gray-800">sales_report</div>
+                                            <div class="text-xs text-gray-500">访问次数: 445</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 平台公告 -->
+                <div class="mt-6 bg-white rounded-xl card-shadow p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800">平台公告</h3>
+                        <button class="text-primary text-sm hover:text-primary-dark">查看全部</button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- 重要公告 -->
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <i class="fas fa-exclamation-circle text-error"></i>
+                                <span class="font-medium text-gray-800">重要公告</span>
+                            </div>
+                            <div class="p-3 border-l-4 border-error bg-red-50 hover:bg-red-100 cursor-pointer transition-colors">
+                                <div class="text-sm font-medium text-gray-800 mb-1">系统维护通知</div>
+                                <div class="text-xs text-gray-500 mb-2">本周六凌晨2:00-6:00进行系统维护</div>
+                                <div class="text-xs text-gray-400">2025-06-13 09:00</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 版本更新 -->
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <i class="fas fa-rocket text-primary"></i>
+                                <span class="font-medium text-gray-800">版本更新</span>
+                            </div>
+                            <div class="p-3 border-l-4 border-primary bg-blue-50 hover:bg-blue-100 cursor-pointer transition-colors">
+                                <div class="text-sm font-medium text-gray-800 mb-1">V1.2.0 版本发布</div>
+                                <div class="text-xs text-gray-500 mb-2">新增数据血缘可视化功能</div>
+                                <div class="text-xs text-gray-400">2025-06-12 14:30</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 使用指南 -->
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <i class="fas fa-book text-success"></i>
+                                <span class="font-medium text-gray-800">使用指南</span>
+                            </div>
+                            <div class="p-3 border-l-4 border-success bg-green-50 hover:bg-green-100 cursor-pointer transition-colors">
+                                <div class="text-sm font-medium text-gray-800 mb-1">数据资产管理最佳实践</div>
+                                <div class="text-xs text-gray-500 mb-2">如何规范化管理企业数据资产</div>
+                                <div class="text-xs text-gray-400">2025-06-11 10:15</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading状态模态框 -->
+    <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 flex flex-col items-center">
+            <div class="skeleton w-16 h-16 rounded-full mb-4"></div>
+            <div class="text-gray-700">数据加载中...</div>
+        </div>
+    </div>
+
+    <!-- Error状态模态框 -->
+    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 text-center max-w-md">
+            <i class="fas fa-exclamation-triangle text-6xl text-gray-300 mb-4"></i>
+            <div class="text-gray-800 text-lg font-medium mb-2">数据加载失败</div>
+            <div class="text-gray-500 text-sm mb-6">网络连接异常，请检查网络后重试</div>
+            <div class="flex space-x-4 justify-center">
+                <button class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark">重试</button>
+                <button class="px-4 py-2 border border-gray-300 text-gray-600 rounded hover:bg-gray-50">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 侧边栏收缩功能
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+            
+            if (sidebar.classList.contains('sidebar-expanded')) {
+                sidebar.classList.remove('sidebar-expanded');
+                sidebar.classList.add('sidebar-collapsed');
+                mainContent.classList.remove('ml-60');
+                mainContent.classList.add('ml-20');
+                sidebarTexts.forEach(text => text.style.display = 'none');
+            } else {
+                sidebar.classList.remove('sidebar-collapsed');
+                sidebar.classList.add('sidebar-expanded');
+                mainContent.classList.remove('ml-20');
+                mainContent.classList.add('ml-60');
+                sidebarTexts.forEach(text => text.style.display = 'inline');
+            }
+        }
+
+        // 移动端菜单控制
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', toggleSidebar);
+
+        // 标签页切换功能
+        function initTabSwitching() {
+            const tabs = document.querySelectorAll('button[data-tab]');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabGroup = this.getAttribute('data-tab-group');
+                    const targetTab = this.getAttribute('data-tab');
+                    
+                    // 更新标签页样式
+                    document.querySelectorAll(`button[data-tab-group="${tabGroup}"]`).forEach(t => {
+                        t.classList.remove('text-primary', 'border-b-2', 'border-primary');
+                        t.classList.add('text-gray-500');
+                    });
+                    
+                    this.classList.add('text-primary', 'border-b-2', 'border-primary');
+                    this.classList.remove('text-gray-500');
+                    
+                    // 更新内容区域
+                    document.querySelectorAll(`div[data-content-group="${tabGroup}"]`).forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    const targetContent = document.querySelector(`div[data-content="${targetTab}"]`);
+                    if (targetContent) {
+                        targetContent.classList.remove('hidden');
+                    }
+                });
+            });
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTabSwitching();
+            
+            // 响应式处理
+            function handleResize() {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                
+                if (window.innerWidth < 1024) {
+                    // 小屏幕自动收起侧边栏
+                    sidebar.classList.remove('sidebar-expanded');
+                    sidebar.classList.add('sidebar-collapsed');
+                    mainContent.classList.remove('ml-60');
+                    mainContent.classList.add('ml-20');
+                    document.querySelectorAll('.sidebar-text').forEach(text => text.style.display = 'none');
+                }
+            }
+            
+            window.addEventListener('resize', handleResize);
+            handleResize(); // 初始化时检查一次
+            
+            // 模拟数据定时刷新
+            setInterval(() => {
+                console.log('数据刷新...');
+            }, 300000); // 5分钟刷新一次
+        });
+
+        // 键盘快捷键支持
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K 聚焦搜索框
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.querySelector('input[type="text"]')?.focus();
+            }
+            
+            // ESC 关闭模态框
+            if (e.key === 'Escape') {
+                document.getElementById('loadingModal').classList.add('hidden');
+                document.getElementById('errorModal').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

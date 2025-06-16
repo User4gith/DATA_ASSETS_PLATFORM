@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数智之眼 - 数据详情</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1890ff',
+                        'primary-light': '#40a9ff',
+                        'primary-dark': '#096dd9',
+                        success: '#52c41a',
+                        warning: '#faad14',
+                        error: '#ff4d4f',
+                        'text-primary': '#262626',
+                        'text-secondary': '#595959',
+                        'text-tertiary': '#8c8c8c',
+                        'bg-secondary': '#fafafa',
+                        'bg-tertiary': '#f5f5f5',
+                        'border-primary': '#d9d9d9',
+                        'border-secondary': '#e8e8e8'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-collapsed { width: 80px; }
+        .sidebar-expanded { width: 240px; }
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .tree-item:hover {
+            background-color: #f0f9ff;
+            border-radius: 4px;
+        }
+        .tree-item.active {
+            background-color: #e6f7ff;
+            color: #1890ff;
+            font-weight: 500;
+        }
+        .tab-active {
+            color: #1890ff;
+            border-bottom: 2px solid #1890ff;
+            background: linear-gradient(to bottom, #f0f9ff, #ffffff);
+        }
+        .breadcrumb-divider::after {
+            content: '/';
+            margin: 0 8px;
+            color: #d0d7de;
+        }
+        .lineage-node {
+            border: 2px solid #1890ff;
+            border-radius: 8px;
+            background: white;
+            padding: 12px;
+            min-width: 120px;
+            text-align: center;
+            position: relative;
+        }
+        .lineage-edge {
+            stroke: #1890ff;
+            stroke-width: 2;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+        .info-label {
+            min-width: 100px;
+            color: #666;
+            font-weight: 500;
+        }
+        .editable-field {
+            border: 1px dashed #d9d9d9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .editable-field:hover {
+            background-color: #f5f5f5;
+            border-color: #1890ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50 h-16">
+        <div class="flex items-center justify-between h-full px-6">
+            <!-- 左侧：Logo和产品名称 -->
+            <div class="flex items-center">
+                <!-- 菜单伸缩按钮 -->
+                <button id="sidebarToggleBtn" class="p-2 text-gray-600 hover:text-primary transition-colors mr-2" onclick="toggleSidebar()">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-eye text-white text-lg"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800 hidden sm:block">数智之眼</span>
+                </div>
+                
+                <!-- 移动端菜单按钮 -->
+                <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-600 hover:text-primary ml-4">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+            </div>
+
+            <!-- 中间：全局搜索框 -->
+            <div class="flex-1 max-w-xl mx-4 hidden md:block">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        placeholder="搜索数据资产、表名、字段..." 
+                        class="w-full px-4 py-2 pl-10 pr-4 text-sm border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white"
+                    >
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- 右侧：快捷功能和用户信息 -->
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <!-- 移动端搜索按钮 -->
+                <button class="md:hidden p-2 text-gray-600 hover:text-primary">
+                    <i class="fas fa-search text-lg"></i>
+                </button>
+                
+                <!-- 帮助文档 -->
+                <button class="p-2 text-gray-600 hover:text-primary transition-colors">
+                    <i class="fas fa-question-circle text-lg"></i>
+                </button>
+                
+                <!-- 消息通知 -->
+                <button class="p-2 text-gray-600 hover:text-primary transition-colors relative">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                </button>
+
+                <!-- 用户信息 -->
+                <div class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 px-2 md:px-3 py-2 rounded-lg transition-colors">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm font-medium">张</span>
+                    </div>
+                    <span class="text-gray-800 font-medium hidden sm:block">张三</span>
+                    <i class="fas fa-chevron-down text-gray-400 text-sm hidden sm:block"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- 左侧菜单栏 -->
+        <aside id="sidebar" class="sidebar-expanded bg-white border-r border-gray-200 fixed left-0 top-16 bottom-0 z-40 transition-all duration-300">
+            <nav class="p-4 space-y-2">
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-tachometer-alt w-5"></i>
+                    <span class="sidebar-text">首页仪表盘</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 bg-primary text-white rounded-lg">
+                    <i class="fas fa-database w-5"></i>
+                    <span class="sidebar-text">数据资产中心</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-chart-bar w-5"></i>
+                    <span class="sidebar-text">统计与报表</span>
+                    <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-exclamation-triangle w-5"></i>
+                    <span class="sidebar-text">监控与告警</span>
+                    <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-cog w-5"></i>
+                    <span class="sidebar-text">系统管理</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main id="mainContent" class="flex-1 ml-60 transition-all duration-300">
+            <div class="p-6">
+                <!-- 面包屑导航 -->
+                <nav class="flex items-center text-sm text-gray-500 mb-4">
+                    <i class="fas fa-home mr-2"></i>
+                    <span class="breadcrumb-divider">数据资产中心</span>
+                    <span class="breadcrumb-divider">资产地图</span>
+                    <span>数据详情</span>
+                </nav>
+
+                <!-- 页面标题区域 -->
+                <div class="bg-white rounded-xl card-shadow p-6 mb-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start space-x-4">
+                            <!-- Hive图标 -->
+                            <div class="w-16 h-16 bg-yellow-400 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-database text-white text-2xl"></i>
+                                <span class="absolute mt-8 text-xs font-medium text-gray-600">Hive</span>
+                            </div>
+                            
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <h1 class="text-2xl font-bold text-gray-800">mammut_user.ods_dsc_demo_zw_sales_order_df</h1>
+                                    <i class="fas fa-star text-gray-300 cursor-pointer hover:text-yellow-500"></i>
+                                    <i class="fas fa-edit text-gray-400 cursor-pointer hover:text-primary"></i>
+                                </div>
+                                
+                                <div class="flex items-center space-x-6 text-sm text-gray-600">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-medium">技术负责人:</span>
+                                        <span>7643815144@qq.com</span>
+                                        <i class="fas fa-edit text-gray-400 cursor-pointer hover:text-primary"></i>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-medium">业务负责人:</span>
+                                        <span class="editable-field">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 右侧统计信息 -->
+                        <div class="flex items-center space-x-6 text-sm">
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-gray-800">2</div>
+                                <div class="text-gray-500">收藏用户数</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-gray-800">0</div>
+                                <div class="text-gray-500">议题数量</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-gray-800">0</div>
+                                <div class="text-gray-500">引用明细数</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-gray-800">0</div>
+                                <div class="text-gray-500">深度引用数</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 功能标签导航 -->
+                <div class="bg-white rounded-xl card-shadow mb-6">
+                    <div class="flex items-center px-6 pt-4 border-b border-gray-200">
+                        <div class="flex space-x-0">
+                            <button class="tab-button px-4 py-3 text-primary font-medium border-b-2 border-primary bg-gradient-to-b from-blue-50 to-white" data-tab="content">内容表</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="properties">属性表</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="ddl">数据DDL</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="lineage-select">数据血缘Select明细</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="lineage-record">数据血缘记录</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="auto-analysis">自动分析</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="subscription">订阅明细</button>
+                        </div>
+                    </div>
+
+                    <!-- 主功能标签 -->
+                    <div class="flex items-center px-6 py-4 space-x-6 bg-gray-50">
+                        <button class="main-tab-button px-4 py-2 bg-primary text-white rounded font-medium" data-main-tab="basic">基础信息</button>
+                        <button class="main-tab-button px-4 py-2 text-gray-600 hover:text-primary" data-main-tab="details">明细信息</button>
+                        <button class="main-tab-button px-4 py-2 text-gray-600 hover:text-primary" data-main-tab="preview">数据预览</button>
+                        <button class="main-tab-button px-4 py-2 text-gray-600 hover:text-primary" data-main-tab="output">产出信息</button>
+                        <button class="main-tab-button px-4 py-2 text-gray-600 hover:text-primary" data-main-tab="lineage">数据血缘</button>
+                        <button class="main-tab-button px-4 py-2 text-gray-600 hover:text-primary" data-main-tab="usage">使用说明</button>
+                        <button class="main-tab-button px-4 py-2 text-gray-600 hover:text-primary" data-main-tab="changes">数据变更</button>
+                        <button class="main-tab-button px-4 py-2 text-gray-600 hover:text-primary" data-main-tab="tags">数据标签</button>
+                    </div>
+                </div>
+
+                <!-- 内容区域 -->
+                <div class="space-y-6">
+                    <!-- 基础信息面板 -->
+                    <div id="basic-panel" class="content-panel">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <!-- 基础信息 -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-chevron-down text-primary mr-2"></i>
+                                    基础信息
+                                </h3>
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div class="space-y-4">
+                                        <div class="flex items-center">
+                                            <span class="info-label">内容表:</span>
+                                            <span class="ml-4">mammut_user</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="info-label">表类型:</span>
+                                            <span class="ml-4">表</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="info-label">表示代码:</span>
+                                            <span class="ml-4">无</span>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center">
+                                            <span class="info-label">项目组:</span>
+                                            <span class="ml-4">bdms</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="info-label">环境:</span>
+                                            <span class="ml-4">mammut_user-easyops-cluster</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="info-label">产品名称:</span>
+                                            <span class="ml-4 text-primary cursor-pointer">管理</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 业务信息 -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-chevron-down text-primary mr-2"></i>
+                                    业务信息
+                                </h3>
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div class="space-y-4">
+                                        <div class="flex items-center">
+                                            <span class="info-label">表描述:</span>
+                                            <span class="ml-4">--</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="info-label">实现方式:</span>
+                                            <span class="ml-4">简单外部</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="info-label">表示代码:</span>
+                                            <span class="ml-4">--</span>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center">
+                                            <span class="info-label">数据分层:</span>
+                                            <span class="ml-4 text-primary">数据详细</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="info-label">虚拟网表数:</span>
+                                            <span class="ml-4">无正</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="info-label">管理或检查条件:</span>
+                                            <span class="ml-4 text-primary">复照</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 技术信息 -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-chevron-down text-primary mr-2"></i>
+                                    技术信息
+                                </h3>
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div class="space-y-4">
+                                        <div class="flex items-center">
+                                            <span class="info-label">物理存储名:</span>
+                                            <span class="ml-4">0.0B</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="info-label">技术负责:</span>
+                                            <span class="ml-4">无</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="info-label">创建时间:</span>
+                                            <span class="ml-4">2025-03-09 16:53:40</span>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center">
+                                            <span class="info-label">位置:</span>
+                                            <span class="ml-4 text-sm">hdfs://easyops-cluster/user/mammut_use...</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="info-label">分层数:</span>
+                                            <span class="ml-4">Parquet</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="info-label">最近更新时间:</span>
+                                            <span class="ml-4">2025-03-09 16:12:56</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 明细信息面板 -->
+                    <div id="details-panel" class="content-panel hidden">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-list mr-2 text-primary"></i>
+                                    字段信息
+                                </h3>
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-chevron-down text-primary"></i>
+                                        <span class="text-sm font-medium">申分区字段</span>
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="支持字段名或注释的模糊搜索"
+                                        class="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- 字段表格 -->
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50">
+                                        <tr class="text-left text-sm text-gray-600">
+                                            <th class="px-4 py-3 font-medium">序号</th>
+                                            <th class="px-4 py-3 font-medium">字段名称</th>
+                                            <th class="px-4 py-3 font-medium">类型</th>
+                                            <th class="px-4 py-3 font-medium">描述 <i class="fas fa-edit text-gray-400"></i></th>
+                                            <th class="px-4 py-3 font-medium">业务含义 <i class="fas fa-edit text-gray-400"></i></th>
+                                            <th class="px-4 py-3 font-medium">标准化描述</th>
+                                            <th class="px-4 py-3 font-medium">标准字段</th>
+                                            <th class="px-4 py-3 font-medium">英文名称</th>
+                                            <th class="px-4 py-3 font-medium">中文名称</th>
+                                            <th class="px-4 py-3 font-medium">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">1</td>
+                                            <td class="px-4 py-3 text-sm font-medium">order_code</td>
+                                            <td class="px-4 py-3 text-sm">string</td>
+                                            <td class="px-4 py-3 text-sm">订单编码</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3">
+                                                <button class="text-primary hover:text-primary-dark text-sm mr-2">编辑</button>
+                                                <button class="text-primary hover:text-primary-dark text-sm">明细</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">2</td>
+                                            <td class="px-4 py-3 text-sm font-medium">cus_code</td>
+                                            <td class="px-4 py-3 text-sm">string</td>
+                                            <td class="px-4 py-3 text-sm">客户编码</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3">
+                                                <button class="text-primary hover:text-primary-dark text-sm mr-2">编辑</button>
+                                                <button class="text-primary hover:text-primary-dark text-sm">明细</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">3</td>
+                                            <td class="px-4 py-3 text-sm font-medium">order_type</td>
+                                            <td class="px-4 py-3 text-sm">string</td>
+                                            <td class="px-4 py-3 text-sm">订单类型</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3">
+                                                <button class="text-primary hover:text-primary-dark text-sm mr-2">编辑</button>
+                                                <button class="text-primary hover:text-primary-dark text-sm">明细</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">4</td>
+                                            <td class="px-4 py-3 text-sm font-medium">order_amt</td>
+                                            <td class="px-4 py-3 text-sm">decimal(16,6)</td>
+                                            <td class="px-4 py-3 text-sm">订单价格</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3">
+                                                <button class="text-primary hover:text-primary-dark text-sm mr-2">编辑</button>
+                                                <button class="text-primary hover:text-primary-dark text-sm">明细</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">5</td>
+                                            <td class="px-4 py-3 text-sm font-medium">order_date</td>
+                                            <td class="px-4 py-3 text-sm">string</td>
+                                            <td class="px-4 py-3 text-sm">订单日期</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3 text-sm">--</td>
+                                            <td class="px-4 py-3">
+                                                <button class="text-primary hover:text-primary-dark text-sm mr-2">编辑</button>
+                                                <button class="text-primary hover:text-primary-dark text-sm">明细</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- 分区字段区域 -->
+                            <div class="mt-8">
+                                <h4 class="text-md font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-chevron-down text-primary mr-2"></i>
+                                    分区字段
+                                </h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full">
+                                        <thead class="bg-gray-50">
+                                            <tr class="text-left text-sm text-gray-600">
+                                                <th class="px-4 py-3 font-medium">序号</th>
+                                                <th class="px-4 py-3 font-medium">字段名称</th>
+                                                <th class="px-4 py-3 font-medium">类型</th>
+                                                <th class="px-4 py-3 font-medium">描述</th>
+                                                <th class="px-4 py-3 font-medium">业务含义</th>
+                                                <th class="px-4 py-3 font-medium">标准化描述</th>
+                                                <th class="px-4 py-3 font-medium">标准字段</th>
+                                                <th class="px-4 py-3 font-medium">英文名称</th>
+                                                <th class="px-4 py-3 font-medium">中文名称</th>
+                                                <th class="px-4 py-3 font-medium">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200">
+                                            <tr>
+                                                <td class="px-4 py-3 text-sm">1</td>
+                                                <td class="px-4 py-3 text-sm font-medium">pt</td>
+                                                <td class="px-4 py-3 text-sm">string</td>
+                                                <td class="px-4 py-3 text-sm">分区日期</td>
+                                                <td class="px-4 py-3 text-sm">--</td>
+                                                <td class="px-4 py-3 text-sm">--</td>
+                                                <td class="px-4 py-3 text-sm">--</td>
+                                                <td class="px-4 py-3 text-sm">--</td>
+                                                <td class="px-4 py-3 text-sm">--</td>
+                                                <td class="px-4 py-3">
+                                                    <button class="text-primary hover:text-primary-dark text-sm mr-2">编辑</button>
+                                                    <button class="text-primary hover:text-primary-dark text-sm">明细</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 分区信息面板 -->
+                    <div id="partitions-panel" class="content-panel hidden">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-layer-group mr-2 text-primary"></i>
+                                    分区信息
+                                </h3>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-500">共有记录条</span>
+                                    <input 
+                                        type="text" 
+                                        placeholder="请输入分区名"
+                                        class="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                                    >
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50">
+                                        <tr class="text-left text-sm text-gray-600">
+                                            <th class="px-4 py-3 font-medium">分区名 <i class="fas fa-sort text-gray-400"></i></th>
+                                            <th class="px-4 py-3 font-medium">分区创建时间 <i class="fas fa-sort text-gray-400"></i></th>
+                                            <th class="px-4 py-3 font-medium">分区修改时间 <i class="fas fa-sort text-gray-400"></i></th>
+                                            <th class="px-4 py-3 font-medium">记录数</th>
+                                            <th class="px-4 py-3 font-medium">存储空间</th>
+                                            <th class="px-4 py-3 font-medium">文件数</th>
+                                            <th class="px-4 py-3 font-medium">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">pt=2025-03-08</td>
+                                            <td class="px-4 py-3 text-sm">2025-03-08 15:56:33</td>
+                                            <td class="px-4 py-3 text-sm">2025-03-08 16:12:56</td>
+                                            <td class="px-4 py-3 text-sm">0</td>
+                                            <td class="px-4 py-3 text-sm">1.9K</td>
+                                            <td class="px-4 py-3 text-sm">1</td>
+                                            <td class="px-4 py-3">
+                                                <button class="text-primary hover:text-primary-dark text-sm">详情</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据血缘面板 -->
+                    <div id="lineage-panel" class="content-panel hidden">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-project-diagram mr-2 text-primary"></i>
+                                    数据血缘
+                                </h3>
+                                <div class="flex items-center space-x-4">
+                                    <div class="bg-blue-50 border border-blue-200 rounded px-3 py-1 flex items-center space-x-2">
+                                        <i class="fas fa-info-circle text-blue-500"></i>
+                                        <span class="text-sm text-blue-600">为了统计程序性能的上游质控，数据仅选择来的了字段，双击框架体。</span>
+                                        <button class="text-blue-600 text-sm">切换到时间视图</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 血缘控制区域 -->
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="flex items-center space-x-4">
+                                    <button class="px-3 py-1 bg-primary text-white text-sm rounded">血缘路径</button>
+                                    <button class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded">字段结构</button>
+                                    <button class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded">下游任务</button>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <input 
+                                        type="text" 
+                                        placeholder="请输入表名"
+                                        class="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                                    >
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm">显示期数情况</span>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </label>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="p-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-50">
+                                            <i class="fas fa-compress-arrows-alt"></i>
+                                        </button>
+                                        <button class="p-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-50">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button class="p-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-50">
+                                            <i class="fas fa-expand"></i>
+                                        </button>
+                                    </div>
+                                    <button class="px-3 py-1 border border-gray-300 text-gray-600 text-sm rounded hover:bg-gray-50">自动布局</button>
+                                    <button class="px-3 py-1 bg-primary text-white text-sm rounded">刷新</button>
+                                </div>
+                            </div>
+
+                            <!-- 血缘图区域 -->
+                            <div class="bg-gray-50 rounded-lg p-6 min-h-96 relative overflow-auto">
+                                <svg width="100%" height="400" class="absolute inset-0">
+                                    <!-- 定义箭头标记 -->
+                                    <defs>
+                                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                            <polygon points="0 0, 10 3.5, 0 7" fill="#1890ff" />
+                                        </marker>
+                                    </defs>
+                                    
+                                    <!-- 连接线 -->
+                                    <path d="M 150 200 L 380 200" class="lineage-edge" />
+                                    <path d="M 580 200 L 810 200" class="lineage-edge" />
+                                </svg>
+                                
+                                <!-- 血缘节点 -->
+                                <div class="absolute" style="left: 50px; top: 150px;">
+                                    <div class="lineage-node">
+                                        <i class="fas fa-plus text-primary mb-2"></i>
+                                        <div class="text-sm font-medium">dsc_demo_zw_sales_order</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="absolute" style="left: 280px; top: 150px;">
+                                    <div class="lineage-node bg-blue-100 border-blue-400">
+                                        <i class="fas fa-play text-primary mb-2"></i>
+                                        <div class="text-xs text-gray-600 mb-1">上游表</div>
+                                        <div class="text-sm font-medium text-blue-600">mammut_user.ods_dsc_demo_zw_sales_order_df</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="absolute" style="left: 680px; top: 150px;">
+                                    <div class="lineage-node">
+                                        <i class="fas fa-table text-yellow-500 mb-2"></i>
+                                        <div class="text-xs text-gray-600 mb-1">下游表</div>
+                                        <div class="text-sm font-medium">mammut_user.ods_dsc_demo_zw_sales_order_df</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+            const toggleBtn = document.getElementById('sidebarToggleBtn');
+            
+            if (sidebar.classList.contains('sidebar-expanded')) {
+                sidebar.classList.remove('sidebar-expanded');
+                sidebar.classList.add('sidebar-collapsed');
+                mainContent.classList.remove('ml-60');
+                mainContent.classList.add('ml-20');
+                sidebarTexts.forEach(text => text.style.display = 'none');
+                
+                toggleBtn.querySelector('i').classList.remove('fa-bars');
+                toggleBtn.querySelector('i').classList.add('fa-indent');
+            } else {
+                sidebar.classList.remove('sidebar-collapsed');
+                sidebar.classList.add('sidebar-expanded');
+                mainContent.classList.remove('ml-20');
+                mainContent.classList.add('ml-60');
+                sidebarTexts.forEach(text => text.style.display = 'inline');
+                
+                toggleBtn.querySelector('i').classList.remove('fa-indent');
+                toggleBtn.querySelector('i').classList.add('fa-bars');
+            }
+        }
+
+        // 标签切换功能
+        function initTabSwitching() {
+            // 主标签切换
+            const mainTabButtons = document.querySelectorAll('.main-tab-button');
+            const contentPanels = document.querySelectorAll('.content-panel');
+            
+            mainTabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetPanel = this.dataset.mainTab + '-panel';
+                    
+                    // 重置所有按钮状态
+                    mainTabButtons.forEach(btn => {
+                        btn.classList.remove('bg-primary', 'text-white');
+                        btn.classList.add('text-gray-600');
+                    });
+                    
+                    // 激活当前按钮
+                    this.classList.add('bg-primary', 'text-white');
+                    this.classList.remove('text-gray-600');
+                    
+                    // 隐藏所有面板
+                    contentPanels.forEach(panel => {
+                        panel.classList.add('hidden');
+                    });
+                    
+                    // 显示目标面板
+                    const panel = document.getElementById(targetPanel);
+                    if (panel) {
+                        panel.classList.remove('hidden');
+                    }
+                });
+            });
+
+            // 功能标签切换
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 重置所有标签状态
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active', 'text-primary', 'border-b-2', 'border-primary', 'bg-gradient-to-b', 'from-blue-50', 'to-white');
+                        btn.classList.add('text-gray-600');
+                    });
+                    
+                    // 激活当前标签
+                    this.classList.add('tab-active');
+                    this.classList.remove('text-gray-600');
+                });
+            });
+        }
+
+        // 可编辑字段功能
+        function initEditableFields() {
+            const editableFields = document.querySelectorAll('.editable-field');
+            editableFields.forEach(field => {
+                field.addEventListener('click', function() {
+                    const currentText = this.textContent;
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = currentText === '--' ? '' : currentText;
+                    input.className = 'px-2 py-1 border border-primary rounded text-sm focus:outline-none';
+                    
+                    // 替换元素
+                    this.parentNode.replaceChild(input, this);
+                    input.focus();
+                    
+                    // 失焦或回车保存
+                    const saveEdit = () => {
+                        const newSpan = document.createElement('span');
+                        newSpan.className = 'editable-field';
+                        newSpan.textContent = input.value || '--';
+                        input.parentNode.replaceChild(newSpan, input);
+                        
+                        // 重新绑定事件
+                        newSpan.addEventListener('click', arguments.callee);
+                    };
+                    
+                    input.addEventListener('blur', saveEdit);
+                    input.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            saveEdit();
+                        }
+                    });
+                });
+            });
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTabSwitching();
+            initEditableFields();
+            
+            // 移动端菜单控制
+            document.getElementById('mobileMenuBtn')?.addEventListener('click', toggleSidebar);
+            
+            // 响应式处理
+            function handleResize() {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                
+                if (window.innerWidth < 1024) {
+                    sidebar.classList.remove('sidebar-expanded');
+                    sidebar.classList.add('sidebar-collapsed');
+                    mainContent.classList.remove('ml-60');
+                    mainContent.classList.add('ml-20');
+                    document.querySelectorAll('.sidebar-text').forEach(text => text.style.display = 'none');
+                }
+            }
+            
+            window.addEventListener('resize', handleResize);
+            handleResize();
+        });
+    </script>
+</body>
+</html>
