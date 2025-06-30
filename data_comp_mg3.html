@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数智之眼 - 合作企业管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1890ff',
+                        'primary-light': '#40a9ff',
+                        'primary-dark': '#096dd9',
+                        success: '#52c41a',
+                        warning: '#faad14',
+                        error: '#ff4d4f'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-collapsed { width: 80px; }
+        .sidebar-expanded { width: 240px; }
+        .card-shadow { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); }
+        .tab-active {
+            color: #1890ff;
+            border-bottom: 2px solid #1890ff;
+            background: linear-gradient(to bottom, #f0f9ff, #ffffff);
+        }
+        .status-active { background: linear-gradient(135deg, #52c41a, #73d13d); }
+        .status-pending { background: linear-gradient(135deg, #faad14, #ffc53d); }
+        .status-expired { background: linear-gradient(135deg, #ff4d4f, #ff7875); }
+        .permission-group-card {
+            border: 2px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+        .permission-group-card:hover {
+            border-color: #1890ff;
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+        }
+        .permission-group-card.selected {
+            border-color: #1890ff;
+            background: linear-gradient(to bottom, #f0f9ff, #ffffff);
+        }
+        .table-search-item {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .table-search-item:hover {
+            background-color: #f9fafb;
+        }
+        .table-search-item.selected {
+            background-color: #eff6ff;
+            border-left: 3px solid #1890ff;
+        }
+        .tag {
+            background: #f0f9ff;
+            color: #1890ff;
+            border: 1px solid #bfdbfe;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin: 2px;
+        }
+        .tag .remove {
+            cursor: pointer;
+            color: #6b7280;
+            font-weight: bold;
+        }
+        .tag .remove:hover {
+            color: #ef4444;
+        }
+        .expandable-row {
+            cursor: pointer;
+        }
+        .expandable-row:hover {
+            background-color: #f9fafb;
+        }
+        .expanded-content {
+            background-color: #f8fafc;
+            border-top: 1px solid #e5e7eb;
+        }
+        .permission-template {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .permission-template:hover {
+            border-color: #1890ff;
+            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+        }
+        .permission-template.selected {
+            border-color: #1890ff;
+            background: #f0f9ff;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .pagination button:hover {
+            background: #f3f4f6;
+        }
+        .pagination button.active {
+            background: #1890ff;
+            color: white;
+            border-color: #1890ff;
+        }
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 侧边栏 -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-full bg-white shadow-lg transition-all duration-300 sidebar-expanded z-40">
+        <div class="p-4 border-b border-gray-200">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                    <i class="fas fa-eye text-white text-sm"></i>
+                </div>
+                <span class="font-bold text-lg text-gray-800 sidebar-text">数智之眼</span>
+            </div>
+        </div>
+        
+        <nav class="mt-4">
+            <div class="px-4 py-2">
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-text">主要功能</div>
+            </div>
+            <a href="index.html" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-primary transition-colors">
+                <i class="fas fa-home w-5"></i>
+                <span class="ml-3 sidebar-text">首页概览</span>
+            </a>
+            <a href="data_assets.html" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-primary transition-colors">
+                <i class="fas fa-database w-5"></i>
+                <span class="ml-3 sidebar-text">数据资产</span>
+            </a>
+            
+            <div class="px-4 py-2 mt-4">
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-text">数据合作</div>
+            </div>
+            <a href="data_comp_mg2.html" class="flex items-center px-4 py-3 bg-primary text-white transition-colors">
+                <i class="fas fa-handshake w-5"></i>
+                <span class="ml-3 sidebar-text">合作企业管理</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main id="mainContent" class="flex-1 ml-60 transition-all duration-300">
+        <div class="p-6">
+            <!-- 面包屑导航 -->
+            <nav class="flex items-center text-sm text-gray-500 mb-4">
+                <a href="index.html" class="hover:text-primary">
+                    <i class="fas fa-home mr-2"></i>
+                </a>
+                <span class="breadcrumb-divider">数据合作</span>
+                <span>合作企业管理</span>
+            </nav>
+
+            <!-- 页面标题 -->
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">合作企业管理</h1>
+                    <p class="text-gray-600 mt-1">管理外部合作企业及其数据访问权限</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50" onclick="refreshData()">
+                        <i class="fas fa-sync-alt mr-2"></i>刷新
+                    </button>
+                    <button class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50" onclick="exportReport()">
+                        <i class="fas fa-download mr-2"></i>导出
+                    </button>
+                    <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark" onclick="openEnterpriseModal()">
+                        <i class="fas fa-plus mr-2"></i>新增企业
+                    </button>
+                </div>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <div class="bg-white p-6 rounded-xl card-shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-blue-100 rounded-lg">
+                            <i class="fas fa-building text-blue-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">合作企业总数</p>
+                            <p class="text-2xl font-bold text-gray-900" id="totalEnterprises">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl card-shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-green-100 rounded-lg">
+                            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">活跃企业</p>
+                            <p class="text-2xl font-bold text-gray-900" id="activeEnterprises">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl card-shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-purple-100 rounded-lg">
+                            <i class="fas fa-key text-purple-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">权限总数</p>
+                            <p class="text-2xl font-bold text-gray-900" id="totalPermissions">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl card-shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-yellow-100 rounded-lg">
+                            <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">即将过期</p>
+                            <p class="text-2xl font-bold text-gray-900" id="expiringSoon">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 标签页 -->
+            <div class="bg-white rounded-xl card-shadow">
+                <div class="border-b border-gray-200">
+                    <nav class="flex space-x-8 px-6">
+                        <button class="py-4 px-1 border-b-2 font-medium text-sm tab-active" onclick="switchTab('enterprises')">
+                            企业管理
+                        </button>
+                        <button class="py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" onclick="switchTab('permissions')">
+                            权限管理
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- 企业管理标签页 -->
+                <div id="enterprises-tab" class="tab-content">
+                    <div class="p-6">
+                        <!-- 搜索和过滤 -->
+                        <div class="flex items-center space-x-4 mb-4">
+                            <div class="flex-1 relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                                <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="搜索企业名称、联系人或邮箱..." onkeyup="searchEnterprises(this.value)">
+                            </div>
+                            <select class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" onchange="filterEnterprises(this.value)">
+                                <option value="">所有状态</option>
+                                <option value="active">活跃</option>
+                                <option value="inactive">已停用</option>
+                                <option value="expiring">即将过期</option>
+                            </select>
+                        </div>
+
+                        <!-- 企业列表 -->
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">企业信息</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">行业</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">权限数量</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">创建时间</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">到期时间</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="enterprisesTableBody" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 分页 -->
+                        <div id="enterprisesPagination" class="pagination"></div>
+                    </div>
+                </div>
+
+                <!-- 权限管理标签页 -->
+                <div id="permissions-tab" class="tab-content hidden">
+                    <div class="p-6">
+                        <!-- 搜索和过滤 -->
+                        <div class="flex items-center space-x-4 mb-4">
+                            <div class="flex-1 relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                                <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="搜索企业名称或数据表..." onkeyup="searchPermissions(this.value)">
+                            </div>
+                            <select class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" onchange="filterPermissions(this.value)">
+                                <option value="">所有企业</option>
+                            </select>
+                            <select class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" onchange="filterPermissionsByStatus(this.value)">
+                                <option value="">所有状态</option>
+                                <option value="active">活跃</option>
+                                <option value="expired">已过期</option>
+                                <option value="expiring">即将过期</option>
+                            </select>
+                        </div>
+
+                        <!-- 权限列表 -->
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">企业名称</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">数据表</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">权限类型</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">有效期</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">访问统计</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="permissionsTableBody" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 分页 -->
+                        <div id="permissionsPagination" class="pagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 新增/编辑企业模态框 -->
+    <div id="enterpriseModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl max-w-md w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 id="enterpriseModalTitle" class="text-lg font-semibold text-gray-800">新增合作企业</h3>
+                    <button onclick="closeEnterpriseModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="enterpriseForm" onsubmit="saveEnterprise(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">企业名称 *</label>
+                            <input type="text" id="enterpriseName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">行业类型</label>
+                            <select id="enterpriseIndustry" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">选择行业</option>
+                                <option value="金融">金融</option>
+                                <option value="科技">科技</option>
+                                <option value="制造">制造</option>
+                                <option value="零售">零售</option>
+                                <option value="医疗">医疗</option>
+                                <option value="教育">教育</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">联系人 *</label>
+                            <input type="text" id="enterpriseContact" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">联系邮箱 *</label>
+                            <input type="email" id="enterpriseEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">到期时间</label>
+                            <input type="date" id="enterpriseExpiry" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                            <textarea id="enterpriseDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="企业合作相关备注信息..."></textarea>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3 mt-6">
+                        <button type="button" onclick="closeEnterpriseModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">取消</button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 权限配置模态框 -->
+    <div id="permissionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            配置数据访问权限 - <span id="selectedEnterpriseName" class="text-primary"></span>
+                        </h3>
+                        <button onclick="closePermissionModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <form id="permissionForm" onsubmit="savePermission(event)">
+                        <input type="hidden" id="selectedEnterpriseId">
+                        
+                        <!-- 权限模板选择 -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">快速配置模板</label>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="permission-template" onclick="selectTemplate('basic')">
+                                    <div class="flex items-center mb-2">
+                                        <i class="fas fa-user-circle text-blue-500 mr-2"></i>
+                                        <span class="font-medium">基础用户数据包</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600">用户基础信息、行为数据等</p>
+                                    <div class="text-xs text-gray-500 mt-1">包含 8 张表</div>
+                                </div>
+                                <div class="permission-template" onclick="selectTemplate('business')">
+                                    <div class="flex items-center mb-2">
+                                        <i class="fas fa-chart-line text-green-500 mr-2"></i>
+                                        <span class="font-medium">业务数据包</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600">交易、订单、产品等业务数据</p>
+                                    <div class="text-xs text-gray-500 mt-1">包含 12 张表</div>
+                                </div>
+                                <div class="permission-template" onclick="selectTemplate('analytics')">
+                                    <div class="flex items-center mb-2">
+                                        <i class="fas fa-chart-pie text-purple-500 mr-2"></i>
+                                        <span class="font-medium">分析数据包</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600">统计报表、分析结果等</p>
+                                    <div class="text-xs text-gray-500 mt-1">包含 6 张表</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 数据表选择 -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">选择数据表</label>
+                            
+                            <!-- 分组选择 -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="permission-group-card rounded-lg p-4" onclick="toggleGroup('user')">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="group-user" class="mr-3">
+                                            <div>
+                                                <div class="font-medium">用户数据类</div>
+                                                <div class="text-sm text-gray-600">用户信息、行为数据等</div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm text-gray-500">23张表</span>
+                                    </div>
+                                </div>
+                                <div class="permission-group-card rounded-lg p-4" onclick="toggleGroup('business')">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="group-business" class="mr-3">
+                                            <div>
+                                                <div class="font-medium">业务数据类</div>
+                                                <div class="text-sm text-gray-600">订单、交易、产品等</div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm text-gray-500">45张表</span>
+                                    </div>
+                                </div>
+                                <div class="permission-group-card rounded-lg p-4" onclick="toggleGroup('financial')">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="group-financial" class="mr-3">
+                                            <div>
+                                                <div class="font-medium">财务数据类</div>
+                                                <div class="text-sm text-gray-600">账单、支付、结算等</div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm text-gray-500">18张表</span>
+                                    </div>
+                                </div>
+                                <div class="permission-group-card rounded-lg p-4" onclick="toggleGroup('operational')">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="group-operational" class="mr-3">
+                                            <div>
+                                                <div class="font-medium">运营数据类</div>
+                                                <div class="text-sm text-gray-600">统计、报表、日志等</div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm text-gray-500">32张表</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 精确搜索 -->
+                            <div class="mb-4">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                    <input type="text" id="tableSearchInput" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="搜索具体数据表名称..." onkeyup="searchTables(this.value)">
+                                </div>
+                            </div>
+
+                            <!-- 搜索结果 -->
+                            <div id="tableSearchResults" class="hidden border border-gray-300 rounded-lg max-h-60 overflow-y-auto">
+                            </div>
+
+                            <!-- 已选择的数据表 -->
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="text-sm font-medium text-gray-700">已选择的数据表</label>
+                                    <button type="button" class="text-sm text-gray-500 hover:text-gray-700" onclick="clearSelectedTables()">清空全部</button>
+                                </div>
+                                <div id="selectedTablesContainer" class="min-h-[40px] p-3 border border-gray-300 rounded-lg bg-gray-50">
+                                    <div id="selectedTablesTags" class="flex flex-wrap gap-2">
+                                        <span class="text-sm text-gray-500">暂未选择数据表</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 权限配置 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-3">权限类型</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="permissionType" value="read" class="mr-2" checked>
+                                        <span>只读权限</span>
+                                        <span class="ml-2 text-sm text-gray-500">(仅查询数据)</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="permissionType" value="read_write" class="mr-2">
+                                        <span>读写权限</span>
+                                        <span class="ml-2 text-sm text-gray-500">(查询和修改数据)</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-3">数据范围</label>
+                                <select id="dataScope" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <option value="all">全部数据</option>
+                                    <option value="recent_1month">近1个月数据</option>
+                                    <option value="recent_3months">近3个月数据</option>
+                                    <option value="recent_1year">近1年数据</option>
+                                    <option value="custom">自定义范围</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 时间设置 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">权限开始时间</label>
+                                <input type="date" id="permissionStartTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">权限结束时间</label>
+                                <input type="date" id="permissionEndTime" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                        </div>
+
+                        <!-- 访问限制 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">每日访问次数限制</label>
+                                <input type="number" id="permissionDailyLimit" value="1000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">单次查询行数限制</label>
+                                <input type="number" id="permissionRowLimit" value="10000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                        </div>
+
+                        <!-- 操作按钮 -->
+                        <div class="flex space-x-3 pt-4 border-t border-gray-200">
+                            <button type="button" onclick="closePermissionModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">取消</button>
+                            <button type="submit" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">保存权限配置</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 权限详情模态框 -->
+    <div id="permissionDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800">权限详情</h3>
+                        <button onclick="closePermissionDetailModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6" id="permissionDetailContent">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知组件 -->
+    <div id="notification" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-sm">
+            <div class="flex items-center">
+                <div id="notificationIcon" class="flex-shrink-0 w-6 h-6 mr-3"></div>
+                <div class="flex-1">
+                    <div id="notificationTitle" class="font-medium text-gray-900"></div>
+                    <div id="notificationMessage" class="text-sm text-gray-600"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据
+        let enterprisesData = [
+            {
+                id: 1,
+                name: '阿里巴巴集团',
+                contact: '张三',
+                email: 'zhangsan@alibaba.com',
+                industry: '科技',
+                status: 'active',
+                createTime: '2024-01-15',
+                expireTime: '2025-01-15',
+                description: '电商和云计算合作伙伴'
+            },
+            {
+                id: 2,
+                name: '腾讯科技',
+                contact: '李四',
+                email: 'lisi@tencent.com',
+                industry: '科技',
+                status: 'active',
+                createTime: '2024-02-01',
+                expireTime: '2025-02-01',
+                description: '社交媒体数据合作'
+            },
+            {
+                id: 3,
+                name: '京东商城',
+                contact: '王五',
+                email: 'wangwu@jd.com',
+                industry: '零售',
+                status: 'active',
+                createTime: '2024-03-10',
+                expireTime: '2024-12-31',
+                description: '零售数据分析合作'
+            },
+            {
+                id: 4,
+                name: '字节跳动',
+                contact: '赵六',
+                email: 'zhaoliu@bytedance.com',
+                industry: '科技',
+                status: 'inactive',
+                createTime: '2024-01-20',
+                expireTime: '2024-11-20',
+                description: '内容数据合作（已暂停）'
+            }
+        ];
+
+        let permissionsData = [
+            {
+                id: 1,
+                enterpriseId: 1,
+                enterpriseName: '阿里巴巴集团',
+                tables: ['user_basic', 'user_behavior', 'transaction_records', 'order_info'],
+                permissionType: 'read',
+                dataScope: 'recent_1year',
+                startTime: '2024-01-15',
+                endTime: '2025-01-15',
+                status: 'active',
+                dailyLimit: 1000,
+                rowLimit: 10000,
+                accessCount: 15420,
+                lastAccess: '2024-06-22 14:30:00'
+            },
+            {
+                id: 2,
+                enterpriseId: 2,
+                enterpriseName: '腾讯科技',
+                tables: ['user_basic', 'user_social', 'content_data'],
+                permissionType: 'read',
+                dataScope: 'recent_3months',
+                startTime: '2024-02-01',
+                endTime: '2025-02-01',
+                status: 'active',
+                dailyLimit: 500,
+                rowLimit: 5000,
+                accessCount: 8932,
+                lastAccess: '2024-06-23 09:15:00'
+            },
+            {
+                id: 3,
+                enterpriseId: 3,
+                enterpriseName: '京东商城',
+                tables: ['product_info', 'transaction_records', 'user_behavior'],
+                permissionType: 'read_write',
+                dataScope: 'all',
+                startTime: '2024-03-10',
+                endTime: '2024-12-31',
+                status: 'expiring',
+                dailyLimit: 2000,
+                rowLimit: 20000,
+                accessCount: 23156,
+                lastAccess: '2024-06-23 11:45:00'
+            }
+        ];
+
+        // 数据表分组配置
+        const tableGroups = {
+            user: {
+                name: '用户数据类',
+                tables: ['user_basic', 'user_profile', 'user_behavior', 'user_preferences', 'user_social', 'user_location', 'user_device', 'user_settings']
+            },
+            business: {
+                name: '业务数据类',
+                tables: ['order_info', 'transaction_records', 'product_info', 'inventory_data', 'pricing_data', 'promotion_data', 'category_data', 'brand_data', 'supplier_data', 'logistics_data']
+            },
+            financial: {
+                name: '财务数据类',
+                tables: ['payment_records', 'billing_info', 'refund_data', 'account_balance', 'financial_reports', 'cost_analysis']
+            },
+            operational: {
+                name: '运营数据类',
+                tables: ['web_analytics', 'app_analytics', 'marketing_data', 'campaign_data', 'conversion_data', 'retention_data', 'content_data', 'feedback_data', 'support_tickets', 'system_logs']
+            }
+        };
+
+        // 权限模板配置
+        const permissionTemplates = {
+            basic: {
+                name: '基础用户数据包',
+                tables: ['user_basic', 'user_profile', 'user_behavior', 'user_preferences']
+            },
+            business: {
+                name: '业务数据包',
+                tables: ['order_info', 'transaction_records', 'product_info', 'inventory_data', 'pricing_data']
+            },
+            analytics: {
+                name: '分析数据包',
+                tables: ['web_analytics', 'app_analytics', 'marketing_data', 'conversion_data']
+            }
+        };
+
+        // 全局变量
+        let selectedTables = [];
+        let editingEnterpriseId = null;
+        let editingPermissionId = null;
+        let currentPage = 1;
+        let pageSize = 10;
+        let filteredEnterprises = [...enterprisesData];
+        let filteredPermissions = [...permissionsData];
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            setDefaultDates();
+            renderEnterprises();
+            renderPermissions();
+            updateStatistics();
+            populateFilterOptions();
+            showNotification('系统就绪', '合作企业管理系统已加载完成', 'success');
+        });
+
+        // 设置默认日期
+        function setDefaultDates() {
+            const today = new Date();
+            const nextYear = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+            
+            document.getElementById('enterpriseExpiry').value = nextYear.toISOString().split('T')[0];
+            document.getElementById('permissionStartTime').value = today.toISOString().split('T')[0];
+            document.getElementById('permissionEndTime').value = nextYear.toISOString().split('T')[0];
+        }
+
+        // 标签页切换
+        function switchTab(tabName) {
+            // 移除所有active类
+            document.querySelectorAll('.py-4').forEach(tab => {
+                tab.classList.remove('tab-active');
+                tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            });
+            
+            // 隐藏所有标签页内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // 激活当前标签页
+            event.target.classList.add('tab-active');
+            event.target.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            
+            // 显示对应内容
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+        }
+
+        // 渲染企业列表
+        function renderEnterprises(page = 1) {
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
+            const pageData = filteredEnterprises.slice(start, end);
+            
+            const tbody = document.getElementById('enterprisesTableBody');
+            tbody.innerHTML = '';
+
+            pageData.forEach(enterprise => {
+                const permissions = permissionsData.filter(p => p.enterpriseId === enterprise.id);
+                const row = createEnterpriseRow(enterprise, permissions);
+                tbody.appendChild(row);
+            });
+
+            renderPagination('enterprisesPagination', filteredEnterprises.length, page, (newPage) => {
+                currentPage = newPage;
+                renderEnterprises(newPage);
+            });
+        }
+
+        function createEnterpriseRow(enterprise, permissions) {
+            const row = document.createElement('tr');
+            row.className = 'expandable-row';
+            
+            let statusClass, statusText;
+            const today = new Date();
+            const expireDate = new Date(enterprise.expireTime);
+            const daysDiff = Math.ceil((expireDate - today) / (1000 * 60 * 60 * 24));
+            
+            if (enterprise.status === 'inactive') {
+                statusClass = 'status-expired';
+                statusText = '已停用';
+            } else if (daysDiff <= 30) {
+                statusClass = 'status-pending';
+                statusText = '即将过期';
+            } else {
+                statusClass = 'status-active';
+                statusText = '活跃';
+            }
+
+            row.innerHTML = `
+                <td class="px-6 py-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-building text-gray-600"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-sm font-medium text-gray-900">${enterprise.name}</div>
+                            <div class="text-sm text-gray-500">${enterprise.contact} • ${enterprise.email}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">${enterprise.industry || '-'}</td>
+                <td class="px-6 py-4">
+                    <span class="px-2 py-1 text-xs font-medium text-white rounded-full ${statusClass}">${statusText}</span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">${permissions.length}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${enterprise.createTime}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${enterprise.expireTime}</td>
+                <td class="px-6 py-4 text-sm">
+                    <div class="flex items-center space-x-2">
+                        <button class="text-blue-600 hover:text-blue-800" onclick="editEnterprise(${enterprise.id})" title="编辑企业">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="text-green-600 hover:text-green-800" onclick="configurePermissions(${enterprise.id})" title="配置权限">
+                            <i class="fas fa-key"></i>
+                        </button>
+                        <button class="text-purple-600 hover:text-purple-800" onclick="viewEnterpriseDetails(${enterprise.id})" title="查看详情">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-red-600 hover:text-red-800" onclick="deleteEnterprise(${enterprise.id})" title="删除企业">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+
+            return row;
+        }
+
+        // 渲染权限列表
+        function renderPermissions(page = 1) {
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
+            const pageData = filteredPermissions.slice(start, end);
+            
+            const tbody = document.getElementById('permissionsTableBody');
+            tbody.innerHTML = '';
+
+            pageData.forEach(permission => {
+                const row = createPermissionRow(permission);
+                tbody.appendChild(row);
+            });
+
+            renderPagination('permissionsPagination', filteredPermissions.length, page, (newPage) => {
+                renderPermissions(newPage);
+            });
+        }
+
+        function createPermissionRow(permission) {
+            const row = document.createElement('tr');
+            row.className = 'expandable-row';
+            
+            let statusClass, statusText;
+            const today = new Date();
+            const endDate = new Date(permission.endTime);
+            const daysDiff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+            
+            if (endDate < today) {
+                statusClass = 'status-expired';
+                statusText = '已过期';
+            } else if (daysDiff <= 30) {
+                statusClass = 'status-pending';
+                statusText = '即将过期';
+            } else {
+                statusClass = 'status-active';
+                statusText = '活跃';
+            }
+
+            const tableCount = permission.tables ? permission.tables.length : 0;
+            const permissionTypeText = permission.permissionType === 'read' ? '只读' : '读写';
+
+            row.innerHTML = `
+                <td class="px-6 py-4">
+                    <div class="text-sm font-medium text-gray-900">${permission.enterpriseName}</div>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="text-sm text-gray-900">${tableCount} 张表</div>
+                    <div class="text-xs text-gray-500">点击查看详情</div>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full ${permission.permissionType === 'read' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">${permissionTypeText}</span>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="text-sm text-gray-900">${permission.startTime}</div>
+                    <div class="text-sm text-gray-500">至 ${permission.endTime}</div>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="px-2 py-1 text-xs font-medium text-white rounded-full ${statusClass}">${statusText}</span>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="text-sm text-gray-900">${permission.accessCount?.toLocaleString() || 0} 次</div>
+                    <div class="text-xs text-gray-500">最近: ${permission.lastAccess || '-'}</div>
+                </td>
+                <td class="px-6 py-4 text-sm">
+                    <div class="flex items-center space-x-2">
+                        <button class="text-blue-600 hover:text-blue-800" onclick="editPermission(${permission.id})" title="编辑权限">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="text-green-600 hover:text-green-800" onclick="viewPermissionDetail(${permission.id})" title="查看详情">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-red-600 hover:text-red-800" onclick="revokePermission(${permission.id})" title="撤销权限">
+                            <i class="fas fa-ban"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+
+            return row;
+        }
+
+        // 分页组件
+        function renderPagination(containerId, totalItems, currentPage, onPageChange) {
+            const container = document.getElementById(containerId);
+            const totalPages = Math.ceil(totalItems / pageSize);
+            
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <button ${currentPage === 1 ? 'disabled' : ''} onclick="(${onPageChange})(${currentPage - 1})">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage || i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+                    html += `<button class="${i === currentPage ? 'active' : ''}" onclick="(${onPageChange})(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += '<span>...</span>';
+                }
+            }
+
+            html += `
+                <button ${currentPage === totalPages ? 'disabled' : ''} onclick="(${onPageChange})(${currentPage + 1})">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // 更新统计信息
+        function updateStatistics() {
+            document.getElementById('totalEnterprises').textContent = enterprisesData.length;
+            document.getElementById('activeEnterprises').textContent = enterprisesData.filter(e => e.status === 'active').length;
+            document.getElementById('totalPermissions').textContent = permissionsData.length;
+            
+            const today = new Date();
+            const expiring = permissionsData.filter(p => {
+                const endDate = new Date(p.endTime);
+                const daysDiff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+                return daysDiff <= 30 && daysDiff > 0;
+            }).length;
+            
+            document.getElementById('expiringSoon').textContent = expiring;
+        }
+
+        // 填充过滤选项
+        function populateFilterOptions() {
+            const enterpriseSelect = document.querySelector('#permissions-tab select');
+            enterpriseSelect.innerHTML = '<option value="">所有企业</option>';
+            
+            const uniqueEnterprises = [...new Set(permissionsData.map(p => p.enterpriseName))];
+            uniqueEnterprises.forEach(name => {
+                enterpriseSelect.innerHTML += `<option value="${name}">${name}</option>`;
+            });
+        }
+
+        // 搜索功能
+        function searchEnterprises(query) {
+            filteredEnterprises = enterprisesData.filter(enterprise => 
+                enterprise.name.toLowerCase().includes(query.toLowerCase()) ||
+                enterprise.contact.toLowerCase().includes(query.toLowerCase()) ||
+                enterprise.email.toLowerCase().includes(query.toLowerCase()) ||
+                (enterprise.industry && enterprise.industry.toLowerCase().includes(query.toLowerCase()))
+            );
+            renderEnterprises(1);
+        }
+
+        function searchPermissions(query) {
+            filteredPermissions = permissionsData.filter(permission => 
+                permission.enterpriseName.toLowerCase().includes(query.toLowerCase()) ||
+                (permission.tables && permission.tables.some(table => table.toLowerCase().includes(query.toLowerCase())))
+            );
+            renderPermissions(1);
+        }
+
+        // 过滤功能
+        function filterEnterprises(status) {
+            if (!status) {
+                filteredEnterprises = [...enterprisesData];
+            } else if (status === 'expiring') {
+                const today = new Date();
+                filteredEnterprises = enterprisesData.filter(e => {
+                    const expireDate = new Date(e.expireTime);
+                    const daysDiff = Math.ceil((expireDate - today) / (1000 * 60 * 60 * 24));
+                    return daysDiff <= 30 && daysDiff > 0;
+                });
+            } else {
+                filteredEnterprises = enterprisesData.filter(e => e.status === status);
+            }
+            renderEnterprises(1);
+        }
+
+        function filterPermissions(enterpriseName) {
+            if (!enterpriseName) {
+                filteredPermissions = [...permissionsData];
+            } else {
+                filteredPermissions = permissionsData.filter(p => p.enterpriseName === enterpriseName);
+            }
+            renderPermissions(1);
+        }
+
+        function filterPermissionsByStatus(status) {
+            if (!status) {
+                filteredPermissions = [...permissionsData];
+            } else {
+                const today = new Date();
+                filteredPermissions = permissionsData.filter(p => {
+                    const endDate = new Date(p.endTime);
+                    const daysDiff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+                    
+                    switch (status) {
+                        case 'active':
+                            return daysDiff > 30;
+                        case 'expiring':
+                            return daysDiff <= 30 && daysDiff > 0;
+                        case 'expired':
+                            return daysDiff <= 0;
+                        default:
+                            return true;
+                    }
+                });
+            }
+            renderPermissions(1);
+        }
+
+        // 企业管理操作
+        function openEnterpriseModal() {
+            editingEnterpriseId = null;
+            document.getElementById('enterpriseModalTitle').textContent = '新增合作企业';
+            document.getElementById('enterpriseForm').reset();
+            setDefaultDates();
+            document.getElementById('enterpriseModal').classList.remove('hidden');
+        }
+
+        function closeEnterpriseModal() {
+            document.getElementById('enterpriseModal').classList.add('hidden');
+        }
+
+        function editEnterprise(id) {
+            const enterprise = enterprisesData.find(e => e.id === id);
+            if (!enterprise) return;
+
+            editingEnterpriseId = id;
+            document.getElementById('enterpriseModalTitle').textContent = '编辑合作企业';
+            document.getElementById('enterpriseName').value = enterprise.name;
+            document.getElementById('enterpriseIndustry').value = enterprise.industry || '';
+            document.getElementById('enterpriseContact').value = enterprise.contact;
+            document.getElementById('enterpriseEmail').value = enterprise.email;
+            document.getElementById('enterpriseExpiry').value = enterprise.expireTime;
+            document.getElementById('enterpriseDescription').value = enterprise.description || '';
+            document.getElementById('enterpriseModal').classList.remove('hidden');
+        }
+
+        function saveEnterprise(event) {
+            event.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('enterpriseName').value,
+                industry: document.getElementById('enterpriseIndustry').value,
+                contact: document.getElementById('enterpriseContact').value,
+                email: document.getElementById('enterpriseEmail').value,
+                expireTime: document.getElementById('enterpriseExpiry').value,
+                description: document.getElementById('enterpriseDescription').value,
+                status: 'active'
+            };
+
+            if (editingEnterpriseId) {
+                // 编辑企业
+                const index = enterprisesData.findIndex(e => e.id === editingEnterpriseId);
+                if (index !== -1) {
+                    enterprisesData[index] = { ...enterprisesData[index], ...formData };
+                    showNotification('编辑成功', `企业 ${formData.name} 信息已更新`, 'success');
+                }
+            } else {
+                // 新增企业
+                const newId = Math.max(...enterprisesData.map(e => e.id)) + 1;
+                const newEnterprise = {
+                    id: newId,
+                    ...formData,
+                    createTime: new Date().toISOString().split('T')[0]
+                };
+                enterprisesData.push(newEnterprise);
+                showNotification('新增成功', `企业 ${formData.name} 已添加`, 'success');
+            }
+
+            filteredEnterprises = [...enterprisesData];
+            renderEnterprises();
+            updateStatistics();
+            closeEnterpriseModal();
+        }
+
+        function deleteEnterprise(id) {
+            const enterprise = enterprisesData.find(e => e.id === id);
+            if (!enterprise) return;
+
+            if (confirm(`确定要删除企业 "${enterprise.name}" 吗？此操作将同时删除该企业的所有权限配置。`)) {
+                // 删除企业相关的权限
+                permissionsData = permissionsData.filter(p => p.enterpriseId !== id);
+                // 删除企业
+                enterprisesData = enterprisesData.filter(e => e.id !== id);
+                
+                filteredEnterprises = [...enterprisesData];
+                filteredPermissions = [...permissionsData];
+                
+                renderEnterprises();
+                renderPermissions();
+                updateStatistics();
+                populateFilterOptions();
+                
+                showNotification('删除成功', `企业 ${enterprise.name} 已删除`, 'success');
+            }
+        }
+
+        function viewEnterpriseDetails(id) {
+            const enterprise = enterprisesData.find(e => e.id === id);
+            const permissions = permissionsData.filter(p => p.enterpriseId === id);
+            
+            let detailsHtml = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><strong>企业名称:</strong> ${enterprise.name}</div>
+                        <div><strong>行业类型:</strong> ${enterprise.industry || '未设置'}</div>
+                        <div><strong>联系人:</strong> ${enterprise.contact}</div>
+                        <div><strong>联系邮箱:</strong> ${enterprise.email}</div>
+                        <div><strong>创建时间:</strong> ${enterprise.createTime}</div>
+                        <div><strong>到期时间:</strong> ${enterprise.expireTime}</div>
+                    </div>
+                    <div><strong>备注:</strong> ${enterprise.description || '无'}</div>
+                    <div><strong>权限配置:</strong> ${permissions.length} 项</div>
+                </div>
+            `;
+            
+            document.getElementById('permissionDetailContent').innerHTML = detailsHtml;
+            document.getElementById('permissionDetailModal').classList.remove('hidden');
+        }
+
+        // 权限管理操作
+        function configurePermissions(enterpriseId) {
+            const enterprise = enterprisesData.find(e => e.id === enterpriseId);
+            if (!enterprise) return;
+
+            editingPermissionId = null;
+            selectedTables = [];
+            
+            document.getElementById('selectedEnterpriseId').value = enterpriseId;
+            document.getElementById('selectedEnterpriseName').textContent = enterprise.name;
+            
+            // 重置表单
+            document.getElementById('permissionForm').reset();
+            setDefaultDates();
+            
+            // 清空已选择的表
+            updateSelectedTablesDisplay();
+            
+            // 重置模板选择
+            document.querySelectorAll('.permission-template').forEach(template => {
+                template.classList.remove('selected');
+            });
+            
+            // 重置分组选择
+            document.querySelectorAll('[id^="group-"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            document.getElementById('permissionModal').classList.remove('hidden');
+        }
+
+        function closePermissionModal() {
+            document.getElementById('permissionModal').classList.add('hidden');
+        }
+
+        function editPermission(id) {
+            const permission = permissionsData.find(p => p.id === id);
+            if (!permission) return;
+
+            editingPermissionId = id;
+            selectedTables = [...permission.tables];
+            
+            document.getElementById('selectedEnterpriseId').value = permission.enterpriseId;
+            document.getElementById('selectedEnterpriseName').textContent = permission.enterpriseName;
+            
+            // 填充表单数据
+            document.querySelector(`input[name="permissionType"][value="${permission.permissionType}"]`).checked = true;
+            document.getElementById('dataScope').value = permission.dataScope || 'all';
+            document.getElementById('permissionStartTime').value = permission.startTime;
+            document.getElementById('permissionEndTime').value = permission.endTime;
+            document.getElementById('permissionDailyLimit').value = permission.dailyLimit;
+            document.getElementById('permissionRowLimit').value = permission.rowLimit;
+            
+            updateSelectedTablesDisplay();
+            document.getElementById('permissionModal').classList.remove('hidden');
+        }
+
+        function savePermission(event) {
+            event.preventDefault();
+            
+            if (selectedTables.length === 0) {
+                showNotification('配置错误', '请至少选择一个数据表', 'error');
+                return;
+            }
+
+            const enterpriseId = parseInt(document.getElementById('selectedEnterpriseId').value);
+            const enterprise = enterprisesData.find(e => e.id === enterpriseId);
+            
+            const formData = {
+                enterpriseId: enterpriseId,
+                enterpriseName: enterprise.name,
+                tables: [...selectedTables],
+                permissionType: document.querySelector('input[name="permissionType"]:checked').value,
+                dataScope: document.getElementById('dataScope').value,
+                startTime: document.getElementById('permissionStartTime').value,
+                endTime: document.getElementById('permissionEndTime').value,
+                dailyLimit: parseInt(document.getElementById('permissionDailyLimit').value),
+                rowLimit: parseInt(document.getElementById('permissionRowLimit').value),
+                status: 'active',
+                accessCount: 0,
+                lastAccess: null
+            };
+
+            if (editingPermissionId) {
+                // 编辑权限
+                const index = permissionsData.findIndex(p => p.id === editingPermissionId);
+                if (index !== -1) {
+                    permissionsData[index] = { ...permissionsData[index], ...formData };
+                    showNotification('权限更新', `${enterprise.name} 的权限配置已更新`, 'success');
+                }
+            } else {
+                // 新增权限
+                const newId = Math.max(...permissionsData.map(p => p.id), 0) + 1;
+                const newPermission = { id: newId, ...formData };
+                permissionsData.push(newPermission);
+                showNotification('权限配置', `已为 ${enterprise.name} 配置数据访问权限`, 'success');
+            }
+
+            filteredPermissions = [...permissionsData];
+            renderPermissions();
+            updateStatistics();
+            populateFilterOptions();
+            closePermissionModal();
+        }
+
+        function viewPermissionDetail(id) {
+            const permission = permissionsData.find(p => p.id === id);
+            if (!permission) return;
+
+            const tablesList = permission.tables.map(table => `<span class="tag">${table}</span>`).join('');
+            const permissionTypeText = permission.permissionType === 'read' ? '只读权限' : '读写权限';
+            
+            let detailsHtml = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><strong>企业名称:</strong> ${permission.enterpriseName}</div>
+                        <div><strong>权限类型:</strong> ${permissionTypeText}</div>
+                        <div><strong>数据范围:</strong> ${permission.dataScope}</div>
+                        <div><strong>开始时间:</strong> ${permission.startTime}</div>
+                        <div><strong>结束时间:</strong> ${permission.endTime}</div>
+                        <div><strong>访问次数:</strong> ${permission.accessCount?.toLocaleString() || 0}</div>
+                        <div><strong>日访问限制:</strong> ${permission.dailyLimit}</div>
+                        <div><strong>行数限制:</strong> ${permission.rowLimit}</div>
+                    </div>
+                    <div><strong>最近访问:</strong> ${permission.lastAccess || '未访问'}</div>
+                    <div>
+                        <strong>授权数据表 (${permission.tables.length} 张):</strong>
+                        <div class="mt-2">${tablesList}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('permissionDetailContent').innerHTML = detailsHtml;
+            document.getElementById('permissionDetailModal').classList.remove('hidden');
+        }
+
+        function revokePermission(id) {
+            const permission = permissionsData.find(p => p.id === id);
+            if (!permission) return;
+
+            if (confirm(`确定要撤销 "${permission.enterpriseName}" 的数据访问权限吗？`)) {
+                permissionsData = permissionsData.filter(p => p.id !== id);
+                filteredPermissions = [...permissionsData];
+                renderPermissions();
+                updateStatistics();
+                showNotification('权限撤销', `已撤销 ${permission.enterpriseName} 的数据访问权限`, 'success');
+            }
+        }
+
+        function closePermissionDetailModal() {
+            document.getElementById('permissionDetailModal').classList.add('hidden');
+        }
+
+        // 权限配置相关功能
+        function selectTemplate(templateName) {
+            // 重置所有模板选择
+            document.querySelectorAll('.permission-template').forEach(template => {
+                template.classList.remove('selected');
+            });
+            
+            // 选择当前模板
+            event.currentTarget.classList.add('selected');
+            
+            // 应用模板
+            if (permissionTemplates[templateName]) {
+                selectedTables = [...permissionTemplates[templateName].tables];
+                updateSelectedTablesDisplay();
+                showNotification('模板应用', `已应用 ${permissionTemplates[templateName].name}`, 'success');
+            }
+        }
+
+        function toggleGroup(groupName) {
+            const checkbox = document.getElementById(`group-${groupName}`);
+            const groupTables = tableGroups[groupName]?.tables || [];
+            
+            if (checkbox.checked) {
+                // 移除该组的所有表
+                selectedTables = selectedTables.filter(table => !groupTables.includes(table));
+                checkbox.checked = false;
+                event.currentTarget.classList.remove('selected');
+            } else {
+                // 添加该组的所有表
+                groupTables.forEach(table => {
+                    if (!selectedTables.includes(table)) {
+                        selectedTables.push(table);
+                    }
+                });
+                checkbox.checked = true;
+                event.currentTarget.classList.add('selected');
+            }
+            
+            updateSelectedTablesDisplay();
+        }
+
+        function searchTables(query) {
+            const resultsContainer = document.getElementById('tableSearchResults');
+            
+            if (!query.trim()) {
+                resultsContainer.classList.add('hidden');
+                return;
+            }
+            
+            // 搜索所有表
+            const allTables = Object.values(tableGroups).flatMap(group => group.tables);
+            const filteredTables = allTables.filter(table => 
+                table.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            if (filteredTables.length === 0) {
+                resultsContainer.innerHTML = '<div class="p-3 text-gray-500 text-center">未找到匹配的数据表</div>';
+            } else {
+                resultsContainer.innerHTML = filteredTables.map(table => `
+                    <div class="table-search-item ${selectedTables.includes(table) ? 'selected' : ''}" onclick="toggleTable('${table}')">
+                        <div class="flex items-center justify-between">
+                            <span>${table}</span>
+                            <i class="fas fa-${selectedTables.includes(table) ? 'check-circle text-green-500' : 'plus-circle text-gray-400'}"></i>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            resultsContainer.classList.remove('hidden');
+        }
+
+        function toggleTable(tableName) {
+            if (selectedTables.includes(tableName)) {
+                selectedTables = selectedTables.filter(table => table !== tableName);
+            } else {
+                selectedTables.push(tableName);
+            }
+            
+            updateSelectedTablesDisplay();
+            
+            // 更新搜索结果显示
+            const query = document.getElementById('tableSearchInput').value;
+            if (query.trim()) {
+                searchTables(query);
+            }
+        }
+
+        function updateSelectedTablesDisplay() {
+            const container = document.getElementById('selectedTablesTags');
+            
+            if (selectedTables.length === 0) {
+                container.innerHTML = '<span class="text-sm text-gray-500">暂未选择数据表</span>';
+            } else {
+                container.innerHTML = selectedTables.map(table => `
+                    <span class="tag">
+                        ${table}
+                        <span class="remove" onclick="removeTable('${table}')">&times;</span>
+                    </span>
+                `).join('');
+            }
+        }
+
+        function removeTable(tableName) {
+            selectedTables = selectedTables.filter(table => table !== tableName);
+            updateSelectedTablesDisplay();
+        }
+
+        function clearSelectedTables() {
+            selectedTables = [];
+            updateSelectedTablesDisplay();
+            
+            // 重置分组选择
+            document.querySelectorAll('[id^="group-"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            document.querySelectorAll('.permission-group-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+        }
+
+        // 工具函数
+        function refreshData() {
+            renderEnterprises();
+            renderPermissions();
+            updateStatistics();
+            showNotification('刷新完成', '数据已更新到最新状态', 'success');
+        }
+
+        function exportReport() {
+            const data = {
+                enterprises: enterprisesData,
+                permissions: permissionsData,
+                exportTime: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `企业管理报告_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('导出成功', '企业管理报告已导出', 'success');
+        }
+
+        // 通知系统
+        function showNotification(title, message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const titleEl = document.getElementById('notificationTitle');
+            const messageEl = document.getElementById('notificationMessage');
+            const iconEl = document.getElementById('notificationIcon');
+            
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            
+            // 设置图标和样式
+            let iconClass, bgColor;
+            switch (type) {
+                case 'success':
+                    iconClass = 'fas fa-check-circle text-green-500';
+                    bgColor = 'bg-green-50 border-green-200';
+                    break;
+                case 'error':
+                    iconClass = 'fas fa-exclamation-circle text-red-500';
+                    bgColor = 'bg-red-50 border-red-200';
+                    break;
+                case 'warning':
+                    iconClass = 'fas fa-exclamation-triangle text-yellow-500';
+                    bgColor = 'bg-yellow-50 border-yellow-200';
+                    break;
+                default:
+                    iconClass = 'fas fa-info-circle text-blue-500';
+                    bgColor = 'bg-blue-50 border-blue-200';
+            }
+            
+            iconEl.className = iconClass;
+            notification.className = `fixed top-4 right-4 z-50 ${bgColor} border rounded-lg shadow-lg p-4 max-w-sm`;
+            
+            notification.classList.remove('hidden');
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+            
+            if (sidebar.classList.contains('sidebar-expanded')) {
+                sidebar.classList.remove('sidebar-expanded');
+                sidebar.classList.add('sidebar-collapsed');
+                mainContent.classList.remove('ml-60');
+                mainContent.classList.add('ml-20');
+                sidebarTexts.forEach(text => text.style.display = 'none');
+            } else {
+                sidebar.classList.remove('sidebar-collapsed');
+                sidebar.classList.add('sidebar-expanded');
+                mainContent.classList.remove('ml-20');
+                mainContent.classList.add('ml-60');
+                sidebarTexts.forEach(text => text.style.display = 'inline');
+            }
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K 聚焦搜索框
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.querySelector('input[type="text"]');
+                if (searchInput) searchInput.focus();
+            }
+            
+            // ESC 关闭模态框
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.classList.add('hidden');
+                });
+            }
+        });
+
+        // 自动刷新功能（可选）
+        let autoRefreshInterval;
+        function startAutoRefresh() {
+            autoRefreshInterval = setInterval(() => {
+                // 这里可以调用API获取最新数据
+                updateStatistics();
+            }, 30000); // 30秒刷新一次统计数据
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        }
+
+        // 批量操作功能
+        let selectedEnterprises = [];
+        let selectedPermissions = [];
+
+        function toggleEnterpriseSelection(id) {
+            const index = selectedEnterprises.indexOf(id);
+            if (index > -1) {
+                selectedEnterprises.splice(index, 1);
+            } else {
+                selectedEnterprises.push(id);
+            }
+            updateBatchActionButtons();
+        }
+
+        function selectAllEnterprises() {
+            const checkboxes = document.querySelectorAll('.enterprise-checkbox');
+            const selectAll = document.getElementById('selectAllEnterprises').checked;
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll;
+                const id = parseInt(checkbox.dataset.id);
+                if (selectAll && !selectedEnterprises.includes(id)) {
+                    selectedEnterprises.push(id);
+                } else if (!selectAll) {
+                    const index = selectedEnterprises.indexOf(id);
+                    if (index > -1) selectedEnterprises.splice(index, 1);
+                }
+            });
+            
+            updateBatchActionButtons();
+        }
+
+        function updateBatchActionButtons() {
+            const batchActions = document.getElementById('batchActions');
+            if (selectedEnterprises.length > 0) {
+                batchActions.classList.remove('hidden');
+                document.getElementById('selectedCount').textContent = selectedEnterprises.length;
+            } else {
+                batchActions.classList.add('hidden');
+            }
+        }
+
+        function batchDeleteEnterprises() {
+            if (selectedEnterprises.length === 0) return;
+            
+            if (confirm(`确定要删除选中的 ${selectedEnterprises.length} 个企业吗？此操作将同时删除相关的权限配置。`)) {
+                // 删除相关权限
+                permissionsData = permissionsData.filter(p => !selectedEnterprises.includes(p.enterpriseId));
+                // 删除企业
+                enterprisesData = enterprisesData.filter(e => !selectedEnterprises.includes(e.id));
+                
+                selectedEnterprises = [];
+                filteredEnterprises = [...enterprisesData];
+                filteredPermissions = [...permissionsData];
+                
+                renderEnterprises();
+                renderPermissions();
+                updateStatistics();
+                updateBatchActionButtons();
+                
+                showNotification('批量删除成功', '选中的企业已删除', 'success');
+            }
+        }
+
+        function batchExtendExpiry() {
+            if (selectedEnterprises.length === 0) return;
+            
+            const months = prompt('请输入要延长的月数:', '12');
+            if (months && !isNaN(months)) {
+                selectedEnterprises.forEach(id => {
+                    const enterprise = enterprisesData.find(e => e.id === id);
+                    if (enterprise) {
+                        const currentExpiry = new Date(enterprise.expireTime);
+                        currentExpiry.setMonth(currentExpiry.getMonth() + parseInt(months));
+                        enterprise.expireTime = currentExpiry.toISOString().split('T')[0];
+                    }
+                });
+                
+                selectedEnterprises = [];
+                filteredEnterprises = [...enterprisesData];
+                
+                renderEnterprises();
+                updateStatistics();
+                updateBatchActionButtons();
+                
+                showNotification('批量延期成功', `已延长 ${months} 个月`, 'success');
+            }
+        }
+
+        // 数据导入功能
+        function importEnterprises() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json,.csv';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        let importData;
+                        if (file.type === 'application/json') {
+                            importData = JSON.parse(e.target.result);
+                        } else {
+                            // CSV 解析（简单实现）
+                            const lines = e.target.result.split('');
+                            const headers = lines[0].split(',');
+                            importData = lines.slice(1).map(line => {
+                                const values = line.split(',');
+                                const obj = {};
+                                headers.forEach((header, index) => {
+                                    obj[header.trim()] = values[index]?.trim();
+                                });
+                                return obj;
+                            });
+                        }
+                        
+                        // 验证和导入数据
+                        let successCount = 0;
+                        importData.forEach(item => {
+                            if (item.name && item.contact && item.email) {
+                                const newId = Math.max(...enterprisesData.map(e => e.id)) + 1;
+                                enterprisesData.push({
+                                    id: newId,
+                                    name: item.name,
+                                    contact: item.contact,
+                                    email: item.email,
+                                    industry: item.industry || '',
+                                    status: item.status || 'active',
+                                    createTime: new Date().toISOString().split('T')[0],
+                                    expireTime: item.expireTime || new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0],
+                                    description: item.description || ''
+                                });
+                                successCount++;
+                            }
+                        });
+                        
+                        filteredEnterprises = [...enterprisesData];
+                        renderEnterprises();
+                        updateStatistics();
+                        
+                        showNotification('导入成功', `成功导入 ${successCount} 个企业`, 'success');
+                    } catch (error) {
+                        showNotification('导入失败', '文件格式错误或数据不完整', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // 数据验证功能
+        function validatePermissionConfig() {
+            const errors = [];
+            
+            if (selectedTables.length === 0) {
+                errors.push('请至少选择一个数据表');
+            }
+            
+            const startTime = new Date(document.getElementById('permissionStartTime').value);
+            const endTime = new Date(document.getElementById('permissionEndTime').value);
+            
+            if (startTime >= endTime) {
+                errors.push('结束时间必须晚于开始时间');
+            }
+            
+            const dailyLimit = parseInt(document.getElementById('permissionDailyLimit').value);
+            if (dailyLimit <= 0) {
+                errors.push('每日访问次数限制必须大于0');
+            }
+            
+            const rowLimit = parseInt(document.getElementById('permissionRowLimit').value);
+            if (rowLimit <= 0) {
+                errors.push('单次查询行数限制必须大于0');
+            }
+            
+            return errors;
+        }
+
+        // 权限冲突检测
+        function checkPermissionConflicts(enterpriseId, tables) {
+            const conflicts = [];
+            const existingPermissions = permissionsData.filter(p => 
+                p.enterpriseId === enterpriseId && 
+                p.id !== editingPermissionId
+            );
+            
+            existingPermissions.forEach(permission => {
+                const conflictTables = tables.filter(table => permission.tables.includes(table));
+                if (conflictTables.length > 0) {
+                    conflicts.push({
+                        permission: permission,
+                        tables: conflictTables
+                    });
+                }
+            });
+            
+            return conflicts;
+        }
+
+        // 权限变更历史记录
+        let permissionHistory = [];
+
+        function addPermissionHistory(action, enterpriseId, details) {
+            const enterprise = enterprisesData.find(e => e.id === enterpriseId);
+            permissionHistory.push({
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                action: action,
+                enterpriseId: enterpriseId,
+                enterpriseName: enterprise?.name || 'Unknown',
+                details: details,
+                operator: 'Administrator' // 实际应用中应该是当前登录用户
+            });
+            
+            // 保持历史记录在合理范围内
+            if (permissionHistory.length > 1000) {
+                permissionHistory = permissionHistory.slice(-500);
+            }
+        }
+
+        function viewPermissionHistory() {
+            // 这里可以打开一个新的模态框显示权限变更历史
+            console.log('Permission History:', permissionHistory);
+        }
+
+        // 性能监控
+        function trackPerformance() {
+            const observer = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    if (entry.entryType === 'measure') {
+                        console.log(`${entry.name}: ${entry.duration}ms`);
+                    }
+                }
+            });
+            observer.observe({entryTypes: ['measure']});
+        }
+
+        // 本地存储功能
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('enterprisesData', JSON.stringify(enterprisesData));
+                localStorage.setItem('permissionsData', JSON.stringify(permissionsData));
+                localStorage.setItem('permissionHistory', JSON.stringify(permissionHistory));
+            } catch (e) {
+                console.warn('Failed to save to localStorage:', e);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const enterprises = localStorage.getItem('enterprisesData');
+                const permissions = localStorage.getItem('permissionsData');
+                const history = localStorage.getItem('permissionHistory');
+                
+                if (enterprises) enterprisesData = JSON.parse(enterprises);
+                if (permissions) permissionsData = JSON.parse(permissions);
+                if (history) permissionHistory = JSON.parse(history);
+                
+                filteredEnterprises = [...enterprisesData];
+                filteredPermissions = [...permissionsData];
+            } catch (e) {
+                console.warn('Failed to load from localStorage:', e);
+            }
+        }
+
+        // 页面离开前保存数据
+        window.addEventListener('beforeunload', saveToLocalStorage);
+
+        // 启用性能监控（开发环境）
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            trackPerformance();
+        }
+
+        // 页面加载完成后加载本地数据
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFromLocalStorage();
+        });
+    </script>
+</body>
+</html>

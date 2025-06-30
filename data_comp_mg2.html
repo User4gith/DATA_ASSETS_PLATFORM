@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数智之眼 - 合作企业管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1890ff',
+                        'primary-light': '#40a9ff',
+                        'primary-dark': '#096dd9',
+                        success: '#52c41a',
+                        warning: '#faad14',
+                        error: '#ff4d4f'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-collapsed { width: 80px; }
+        .sidebar-expanded { width: 240px; }
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .tab-active {
+            color: #1890ff;
+            border-bottom: 2px solid #1890ff;
+            background: linear-gradient(to bottom, #f0f9ff, #ffffff);
+        }
+        .status-active { background: linear-gradient(135deg, #52c41a, #73d13d); }
+        .status-pending { background: linear-gradient(135deg, #faad14, #ffc53d); }
+        .status-inactive { background: linear-gradient(135deg, #ff4d4f, #ff7875); }
+        .tree-item { transition: all 0.2s; }
+        .tree-item:hover { background: #f5f5f5; }
+        .tree-item.active { background: #e6f7ff; color: #1890ff; }
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        .notification.show { transform: translateX(0); }
+        .modal { backdrop-filter: blur(4px); }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 通知组件 -->
+    <div id="notification" class="notification bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-sm">
+        <div class="flex items-center">
+            <div id="notificationIcon" class="w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-check text-white"></i>
+            </div>
+            <div>
+                <p id="notificationTitle" class="font-medium text-gray-800"></p>
+                <p id="notificationMessage" class="text-sm text-gray-600"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 顶部导航栏 -->
+    <header class="bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50 h-16">
+        <div class="flex items-center justify-between h-full px-6">
+            <div class="flex items-center">
+                <button id="sidebarToggleBtn" class="p-2 text-gray-600 hover:text-primary transition-colors mr-2" onclick="toggleSidebar()">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+                <div class="flex items-center space-x-3">
+                    <a href="index.html" class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-eye text-white text-lg"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-800 hidden sm:block">数智之眼</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="flex-1 max-w-xl mx-4 hidden md:block">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        placeholder="搜索合作企业、数据表..." 
+                        class="w-full px-4 py-2 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button class="p-2 text-gray-600 hover:text-primary" onclick="showHelp()">
+                    <i class="fas fa-question-circle text-lg"></i>
+                </button>
+                <button class="p-2 text-gray-600 hover:text-primary relative" onclick="showNotifications()">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">2</span>
+                </button>
+                <div class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm font-medium">管</span>
+                    </div>
+                    <span class="text-gray-800 font-medium hidden sm:block">管理员</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- 左侧菜单栏 -->
+        <aside id="sidebar" class="sidebar-expanded bg-white border-r border-gray-200 fixed left-0 top-16 bottom-0 z-40 transition-all duration-300">
+            <nav class="p-4 space-y-2">
+                <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-tachometer-alt w-5"></i>
+                    <span class="sidebar-text">首页仪表盘</span>
+                </a>
+                <a href="data_map_coop.html" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-database w-5"></i>
+                    <span class="sidebar-text">数据资产地图</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 bg-primary text-white rounded-lg">
+                    <i class="fas fa-handshake w-5"></i>
+                    <span class="sidebar-text">合作企业管理</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-chart-bar w-5"></i>
+                    <span class="sidebar-text">统计与报表</span>
+                    <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-exclamation-triangle w-5"></i>
+                    <span class="sidebar-text">监控与告警</span>
+                    <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-cog w-5"></i>
+                    <span class="sidebar-text">系统管理</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main id="mainContent" class="flex-1 ml-60 transition-all duration-300">
+            <div class="p-6">
+                <!-- 面包屑导航 -->
+                <nav class="flex items-center text-sm text-gray-500 mb-4">
+                    <a href="index.html" class="hover:text-primary">
+                        <i class="fas fa-home mr-2"></i>
+                    </a>
+                    <span class="breadcrumb-divider">数据合作</span>
+                    <span>合作企业管理</span>
+                </nav>
+
+                <!-- 页面标题 -->
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">合作企业管理</h1>
+                        <p class="text-gray-600 mt-1">管理外部合作企业及其数据访问权限</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50" onclick="refreshData()">
+                            <i class="fas fa-sync-alt mr-2"></i>刷新
+                        </button>
+                        <button class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50" onclick="exportReport()">
+                            <i class="fas fa-download mr-2"></i>导出
+                        </button>
+                        <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark" onclick="openEnterpriseModal()">
+                            <i class="fas fa-plus mr-2"></i>新增企业
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-blue-100 rounded-full">
+                                <i class="fas fa-building text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p id="totalEnterprises" class="text-2xl font-bold text-gray-800">8</p>
+                                <p class="text-gray-600 text-sm">合作企业</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-green-100 rounded-full">
+                                <i class="fas fa-table text-green-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p id="totalTables" class="text-2xl font-bold text-gray-800">15</p>
+                                <p class="text-gray-600 text-sm">共享数据表</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-orange-100 rounded-full">
+                                <i class="fas fa-key text-orange-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p id="totalPermissions" class="text-2xl font-bold text-gray-800">32</p>
+                                <p class="text-gray-600 text-sm">权限配置</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-purple-100 rounded-full">
+                                <i class="fas fa-exchange-alt text-purple-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p id="totalAccess" class="text-2xl font-bold text-gray-800">1,256</p>
+                                <p class="text-gray-600 text-sm">本月访问次数</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 功能标签 -->
+                <div class="bg-white rounded-xl card-shadow mb-6">
+                    <div class="flex items-center px-6 pt-4 border-b border-gray-200">
+                        <div class="flex space-x-0">
+                            <button class="tab-button px-4 py-3 text-primary font-medium tab-active" data-tab="enterprises">企业列表</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="permissions">权限管理</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="access">访问记录</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="assets">数据资产</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 内容区域 -->
+                <div class="space-y-6">
+                    <!-- 企业列表面板 -->
+                    <div id="enterprises-panel" class="content-panel">
+                        <!-- 筛选和搜索 -->
+                        <div class="bg-white rounded-xl card-shadow p-4 mb-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="relative">
+                                        <input 
+                                            id="enterpriseSearch"
+                                            type="text" 
+                                            placeholder="搜索企业名称..." 
+                                            class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-64"
+                                            onkeyup="searchEnterprises()"
+                                        >
+                                        <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                    <select id="statusFilter" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" onchange="filterEnterprises()">
+                                        <option value="">所有状态</option>
+                                        <option value="active">活跃</option>
+                                        <option value="pending">待审核</option>
+                                        <option value="inactive">暂停</option>
+                                    </select>
+                                    <select id="industryFilter" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" onchange="filterEnterprises()">
+                                        <option value="">所有行业</option>
+                                        <option value="科技制造">科技制造</option>
+                                        <option value="电商平台">电商平台</option>
+                                        <option value="新能源汽车">新能源汽车</option>
+                                        <option value="金融科技">金融科技</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-500">共 <span id="enterpriseCount">8</span> 家企业</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 企业列表 -->
+                        <div class="bg-white rounded-xl card-shadow">
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50">
+                                        <tr class="text-left text-sm text-gray-600">
+                                            <th class="px-6 py-4 font-medium">企业信息</th>
+                                            <th class="px-6 py-4 font-medium">行业类型</th>
+                                            <th class="px-6 py-4 font-medium">合作状态</th>
+                                            <th class="px-6 py-4 font-medium">权限数量</th>
+                                            <th class="px-6 py-4 font-medium">创建时间</th>
+                                            <th class="px-6 py-4 font-medium">到期时间</th>
+                                            <th class="px-6 py-4 font-medium">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="enterpriseTableBody" class="divide-y divide-gray-200">
+                                        <!-- 企业数据将通过JavaScript动态生成 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 权限管理面板 -->
+                    <div id="permissions-panel" class="content-panel hidden">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800">数据表访问权限配置</h3>
+                                <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark" onclick="openPermissionModal()">
+                                    <i class="fas fa-plus mr-2"></i>配置权限
+                                </button>
+                            </div>
+                            
+                            <!-- 权限筛选 -->
+                            <div class="flex items-center space-x-4 mb-4">
+                                <select id="permissionEnterpriseFilter" class="px-3 py-2 text-sm border border-gray-300 rounded-lg" onchange="filterPermissions()">
+                                    <option value="">所有企业</option>
+                                </select>
+                                <select id="permissionTableFilter" class="px-3 py-2 text-sm border border-gray-300 rounded-lg" onchange="filterPermissions()">
+                                    <option value="">所有数据表</option>
+                                    <option value="ods_sales_order">ods_sales_order</option>
+                                    <option value="dim_user_info">dim_user_info</option>
+                                    <option value="dws_product_sales">dws_product_sales</option>
+                                </select>
+                                <select id="permissionStatusFilter" class="px-3 py-2 text-sm border border-gray-300 rounded-lg" onchange="filterPermissions()">
+                                    <option value="">所有状态</option>
+                                    <option value="active">活跃</option>
+                                    <option value="expired">已过期</option>
+                                    <option value="disabled">已禁用</option>
+                                </select>
+                            </div>
+                            
+                            <!-- 权限表格 -->
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50">
+                                        <tr class="text-left text-sm text-gray-600">
+                                            <th class="px-4 py-3 font-medium">企业名称</th>
+                                            <th class="px-4 py-3 font-medium">数据表</th>
+                                            <th class="px-4 py-3 font-medium">权限类型</th>
+                                            <th class="px-4 py-3 font-medium">开始时间</th>
+                                            <th class="px-4 py-3 font-medium">结束时间</th>
+                                            <th class="px-4 py-3 font-medium">状态</th>
+                                            <th class="px-4 py-3 font-medium">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="permissionTableBody" class="divide-y divide-gray-200">
+                                        <!-- 权限数据将通过JavaScript动态生成 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 访问记录面板 -->
+                    <div id="access-panel" class="content-panel hidden">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800">数据访问记录</h3>
+                                <div class="flex items-center space-x-3">
+                                    <input type="date" id="accessDateFilter" class="px-3 py-2 text-sm border border-gray-300 rounded-lg" onchange="filterAccessLogs()">
+                                    <select id="accessEnterpriseFilter" class="px-3 py-2 text-sm border border-gray-300 rounded-lg" onchange="filterAccessLogs()">
+                                        <option value="">所有企业</option>
+                                    </select>
+                                    <button class="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200" onclick="exportAccessLogs()">
+                                        <i class="fas fa-download mr-1"></i>导出
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50">
+                                        <tr class="text-left text-sm text-gray-600">
+                                            <th class="px-4 py-3 font-medium">访问时间</th>
+                                            <th class="px-4 py-3 font-medium">企业名称</th>
+                                            <th class="px-4 py-3 font-medium">访问表</th>
+                                            <th class="px-4 py-3 font-medium">操作类型</th>
+                                            <th class="px-4 py-3 font-medium">记录数</th>
+                                            <th class="px-4 py-3 font-medium">IP地址</th>
+                                            <th class="px-4 py-3 font-medium">状态</th>
+                                            <th class="px-4 py-3 font-medium">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="accessTableBody" class="divide-y divide-gray-200">
+                                        <!-- 访问记录数据将通过JavaScript动态生成 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据资产面板 -->
+                    <div id="assets-panel" class="content-panel hidden">
+                        <div class="flex space-x-6">
+                            <!-- 左侧：数据表树形结构 -->
+                            <div class="w-1/3">
+                                <div class="bg-white rounded-xl card-shadow p-4">
+                                    <h4 class="font-semibold text-gray-800 mb-4">数据表分类</h4>
+                                    <div class="space-y-1">
+                                        <!-- 科技企业画像 -->
+                                        <div class="tree-item active px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                            <i class="fas fa-chevron-down text-primary mr-1 transition-transform"></i>
+                                            <i class="fas fa-folder-open text-primary mr-2"></i>
+                                            <span>科技企业画像</span>
+                                        </div>
+                                        <div class="ml-6 space-y-1">
+                                            <div class="tree-item px-3 py-1 cursor-pointer text-sm" onclick="selectTable('ods_sales_order')">
+                                                <i class="fas fa-table text-green-500 mr-2"></i>
+                                                <span>销售订单表</span>
+                                            </div>
+                                            <div class="tree-item px-3 py-1 cursor-pointer text-sm" onclick="selectTable('dim_user_info')">
+                                                <i class="fas fa-table text-green-500 mr-2"></i>
+                                                <span>用户信息表</span>
+                                            </div>
+                                            <div class="tree-item px-3 py-1 cursor-pointer text-sm" onclick="selectTable('dws_product_sales')">
+                                                <i class="fas fa-table text-green-500 mr-2"></i>
+                                                <span>产品销售汇总</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 其他分类 -->
+                                        <div class="tree-item px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                            <i class="fas fa-chevron-right text-gray-400 mr-1 transition-transform"></i>
+                                            <i class="fas fa-folder text-gray-400 mr-2"></i>
+                                            <span>财务数据</span>
+                                        </div>
+                                        <div class="tree-item px-3 py-2 cursor-pointer" onclick="toggleTreeNode(this)">
+                                            <i class="fas fa-chevron-right text-gray-400 mr-1 transition-transform"></i>
+                                            <i class="fas fa-folder text-gray-400 mr-2"></i>
+                                            <span>人力资源</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 右侧：数据表详情 -->
+                            <div class="flex-1">
+                                <div class="bg-white rounded-xl card-shadow p-6">
+                                    <div id="tableDetailContent">
+                                        <div class="text-center py-12 text-gray-500">
+                                            <i class="fas fa-table text-4xl mb-4"></i>
+                                            <p>请从左侧选择数据表查看详情</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 新增/编辑企业模态框 -->
+    <div id="enterpriseModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl max-w-md w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 id="enterpriseModalTitle" class="text-lg font-semibold text-gray-800">新增合作企业</h3>
+                    <button onclick="closeEnterpriseModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="enterpriseForm" onsubmit="saveEnterprise(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">企业名称 *</label>
+                            <input type="text" id="enterpriseName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">行业类型 *</label>
+                            <select id="enterpriseIndustry" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">选择行业</option>
+                                <option value="科技制造">科技制造</option>
+                                <option value="电商平台">电商平台</option>
+                                <option value="新能源汽车">新能源汽车</option>
+                                <option value="金融科技">金融科技</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">联系人 *</label>
+                            <input type="text" id="enterpriseContact" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">联系邮箱 *</label>
+                            <input type="email" id="enterpriseEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">到期时间 *</label>
+                            <input type="date" id="enterpriseExpiry" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">备注说明</label>
+                            <textarea id="enterpriseDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="请输入备注信息..."></textarea>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3 mt-6">
+                        <button type="button" onclick="closeEnterpriseModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">取消</button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 权限配置模态框 -->
+    <div id="permissionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl max-w-lg w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">配置数据访问权限</h3>
+                    <button onclick="closePermissionModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="permissionForm" onsubmit="savePermission(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">合作企业 *</label>
+                            <select id="permissionEnterprise" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">选择企业</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">数据表 *</label>
+                            <select id="permissionTable" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">选择数据表</option>
+                                <option value="ods_sales_order">销售订单表 (ods_sales_order)</option>
+                                <option value="dim_user_info">用户信息表 (dim_user_info)</option>
+                                <option value="dws_product_sales">产品销售汇总 (dws_product_sales)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">权限类型 *</label>
+                            <select id="permissionType" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">选择权限类型</option>
+                                <option value="read">只读</option>
+                                <option value="export">导出</option>
+                                <option value="sync">同步</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">开始时间 *</label>
+                                <input type="date" id="permissionStartTime" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">结束时间 *</label>
+                                <input type="date" id="permissionEndTime" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">访问限制</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">每日访问次数</label>
+                                    <input type="number" id="permissionDailyLimit" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="1000">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">每次查询行数</label>
+                                    <input type="number" id="permissionRowLimit" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="10000">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3 mt-6">
+                        <button type="button" onclick="closePermissionModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">取消</button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局数据存储
+        let enterprisesData = [
+            {
+                id: 1,
+                name: '华为技术有限公司',
+                industry: '科技制造',
+                contact: '张经理',
+                email: 'zhang@huawei.com',
+                status: 'active',
+                createTime: '2024-01-15',
+                expireTime: '2025-01-15',
+                description: '重要战略合作伙伴，主要进行数据交换合作'
+            },
+            {
+                id: 2,
+                name: '阿里巴巴集团',
+                industry: '电商平台',
+                contact: '李经理',
+                email: 'li@alibaba.com',
+                status: 'active',
+                createTime: '2024-02-20',
+                expireTime: '2025-02-20',
+                description: '电商数据分析合作，共享用户行为数据'
+            },
+            {
+                id: 3,
+                name: '比亚迪股份有限公司',
+                industry: '新能源汽车',
+                contact: '王经理',
+                email: 'wang@byd.com',
+                status: 'pending',
+                createTime: '2024-11-01',
+                expireTime: '2025-11-01',
+                description: '新能源汽车数据合作申请审核中'
+            },
+            {
+                id: 4,
+                name: '腾讯科技',
+                industry: '科技制造',
+                contact: '刘经理',
+                email: 'liu@tencent.com',
+                status: 'active',
+                createTime: '2024-03-10',
+                expireTime: '2025-03-10',
+                description: '社交媒体数据分析合作'
+            },
+            {
+                id: 5,
+                name: '美团',
+                industry: '电商平台',
+                contact: '陈经理',
+                email: 'chen@meituan.com',
+                status: 'inactive',
+                createTime: '2024-01-05',
+                expireTime: '2024-12-31',
+                description: '本地生活服务数据合作，已暂停'
+            },
+            {
+                id: 6,
+                name: '字节跳动',
+                industry: '科技制造',
+                contact: '赵经理',
+                email: 'zhao@bytedance.com',
+                status: 'active',
+                createTime: '2024-04-15',
+                expireTime: '2025-04-15',
+                description: '内容推荐算法数据合作'
+            },
+            {
+                id: 7,
+                name: '京东',
+                industry: '电商平台',
+                contact: '孙经理',
+                email: 'sun@jd.com',
+                status: 'active',
+                createTime: '2024-05-01',
+                expireTime: '2025-05-01',
+                description: '电商物流数据共享合作'
+            },
+            {
+                id: 8,
+                name: '蚂蚁金服',
+                industry: '金融科技',
+                contact: '周经理',
+                email: 'zhou@antgroup.com',
+                status: 'active',
+                createTime: '2024-06-10',
+                expireTime: '2025-06-10',
+                description: '金融风控数据合作'
+            }
+        ];
+
+        let permissionsData = [
+            {
+                id: 1,
+                enterpriseId: 1,
+                enterpriseName: '华为技术有限公司',
+                tableName: 'ods_sales_order',
+                permissionType: 'read',
+                startTime: '2024-01-15',
+                endTime: '2025-01-15',
+                status: 'active',
+                dailyLimit: 1000,
+                rowLimit: 10000
+            },
+            {
+                id: 2,
+                enterpriseId: 2,
+                enterpriseName: '阿里巴巴集团',
+                tableName: 'dim_user_info',
+                permissionType: 'export',
+                startTime: '2024-02-20',
+                endTime: '2025-02-20',
+                status: 'active',
+                dailyLimit: 500,
+                rowLimit: 5000
+            },
+            {
+                id: 3,
+                enterpriseId: 4,
+                enterpriseName: '腾讯科技',
+                tableName: 'dws_product_sales',
+                permissionType: 'sync',
+                startTime: '2024-03-10',
+                endTime: '2025-03-10',
+                status: 'active',
+                dailyLimit: 2000,
+                rowLimit: 20000
+            },
+            {
+                id: 4,
+                enterpriseId: 6,
+                enterpriseName: '字节跳动',
+                tableName: 'dim_user_info',
+                permissionType: 'read',
+                startTime: '2024-04-15',
+                endTime: '2024-12-31',
+                status: 'expired',
+                dailyLimit: 800,
+                rowLimit: 8000
+            },
+            {
+                id: 5,
+                enterpriseId: 7,
+                enterpriseName: '京东',
+                tableName: 'ods_sales_order',
+                permissionType: 'export',
+                startTime: '2024-05-01',
+                endTime: '2025-05-01',
+                status: 'active',
+                dailyLimit: 1500,
+                rowLimit: 15000
+            },
+            {
+                id: 6,
+                enterpriseId: 8,
+                enterpriseName: '蚂蚁金服',
+                tableName: 'dim_user_info',
+                permissionType: 'read',
+                startTime: '2024-06-10',
+                endTime: '2025-06-10',
+                status: 'active',
+                dailyLimit: 600,
+                rowLimit: 6000
+            }
+        ];
+
+        let accessLogsData = [
+            {
+                id: 1,
+                enterpriseId: 1,
+                enterpriseName: '华为技术有限公司',
+                tableName: 'ods_sales_order',
+                operation: '查询',
+                time: '2024-12-17 14:35:22',
+                recordCount: 1256,
+                ip: '192.168.1.100',
+                status: '成功'
+            },
+            {
+                id: 2,
+                enterpriseId: 2,
+                enterpriseName: '阿里巴巴集团',
+                tableName: 'dim_user_info',
+                operation: '导出',
+                time: '2024-12-17 13:22:15',
+                recordCount: 850,
+                ip: '172.16.0.55',
+                status: '成功'
+            },
+            {
+                id: 3,
+                enterpriseId: 4,
+                enterpriseName: '腾讯科技',
+                tableName: 'dws_product_sales',
+                operation: '同步',
+                time: '2024-12-17 11:45:33',
+                recordCount: 2134,
+                ip: '10.0.1.200',
+                status: '成功'
+            },
+            {
+                id: 4,
+                enterpriseId: 3,
+                enterpriseName: '比亚迪股份有限公司',
+                tableName: 'ods_sales_order',
+                operation: '查询',
+                time: '2024-12-17 10:18:45',
+                recordCount: 0,
+                ip: '203.114.5.88',
+                status: '权限拒绝'
+            },
+            {
+                id: 5,
+                enterpriseId: 7,
+                enterpriseName: '京东',
+                tableName: 'ods_sales_order',
+                operation: '导出',
+                time: '2024-12-17 09:30:12',
+                recordCount: 3421,
+                ip: '172.18.1.50',
+                status: '成功'
+            },
+            {
+                id: 6,
+                enterpriseId: 8,
+                enterpriseName: '蚂蚁金服',
+                tableName: 'dim_user_info',
+                operation: '查询',
+                time: '2024-12-17 08:15:30',
+                recordCount: 567,
+                ip: '192.168.2.80',
+                status: '成功'
+            }
+        ];
+
+        // 数据表详情数据
+        const tableDetailsData = {
+            'ods_sales_order': {
+                name: 'ods_sales_order',
+                displayName: '销售订单表',
+                description: '存储所有销售订单的原始数据',
+                recordCount: '2,450,000',
+                updateTime: '2024-12-17 15:30:00',
+                owner: '销售部门',
+                fields: [
+                    { name: 'order_id', type: 'VARCHAR', description: '订单ID' },
+                    { name: 'customer_id', type: 'VARCHAR', description: '客户ID' },
+                    { name: 'product_id', type: 'VARCHAR', description: '产品ID' },
+                    { name: 'order_amount', type: 'DECIMAL', description: '订单金额' },
+                    { name: 'order_date', type: 'TIMESTAMP', description: '订单日期' },
+                    { name: 'status', type: 'VARCHAR', description: '订单状态' }
+                ],
+                sharingEnterprises: ['华为技术有限公司', '京东'],
+                accessLevel: '敏感'
+            },
+            'dim_user_info': {
+                name: 'dim_user_info',
+                displayName: '用户信息表',
+                description: '用户基本信息维度表',
+                recordCount: '1,800,000',
+                updateTime: '2024-12-17 12:00:00',
+                owner: '用户中心',
+                fields: [
+                    { name: 'user_id', type: 'VARCHAR', description: '用户ID' },
+                    { name: 'user_name', type: 'VARCHAR', description: '用户姓名' },
+                    { name: 'age', type: 'INT', description: '年龄' },
+                    { name: 'gender', type: 'VARCHAR', description: '性别' },
+                    { name: 'register_date', type: 'TIMESTAMP', description: '注册日期' },
+                    { name: 'user_level', type: 'VARCHAR', description: '用户等级' }
+                ],
+                sharingEnterprises: ['阿里巴巴集团', '字节跳动', '蚂蚁金服'],
+                accessLevel: '机密'
+            },
+            'dws_product_sales': {
+                name: 'dws_product_sales',
+                displayName: '产品销售汇总表',
+                description: '按产品汇总的销售数据',
+                recordCount: '156,000',
+                updateTime: '2024-12-17 16:00:00',
+                owner: '数据分析部',
+                fields: [
+                    { name: 'product_id', type: 'VARCHAR', description: '产品ID' },
+                    { name: 'product_name', type: 'VARCHAR', description: '产品名称' },
+                    { name: 'sales_amount', type: 'DECIMAL', description: '销售金额' },
+                    { name: 'sales_quantity', type: 'INT', description: '销售数量' },
+                    { name: 'stat_date', type: 'DATE', description: '统计日期' }
+                ],
+                sharingEnterprises: ['腾讯科技'],
+                accessLevel: '内部'
+            }
+        };
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTabSwitching();
+            renderEnterprises();
+            renderPermissions();
+            renderAccessLogs();
+            updateStatistics();
+            setTodayDate();
+            populateFilterOptions();
+            
+            showNotification('系统就绪', '合作企业管理系统已加载完成', 'success');
+        });
+
+        // 设置默认日期
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            const nextYear = new Date();
+            nextYear.setFullYear(nextYear.getFullYear() + 1);
+            const oneYearLater = nextYear.toISOString().split('T')[0];
+            
+            document.getElementById('enterpriseExpiry').value = oneYearLater;
+            document.getElementById('permissionStartTime').value = today;
+            document.getElementById('permissionEndTime').value = oneYearLater;
+        }
+
+        // 填充筛选选项
+        function populateFilterOptions() {
+            // 填充权限管理的企业筛选
+            const permissionEnterpriseFilter = document.getElementById('permissionEnterpriseFilter');
+            const accessEnterpriseFilter = document.getElementById('accessEnterpriseFilter');
+            
+            enterprisesData.filter(e => e.status === 'active').forEach(enterprise => {
+                const option1 = new Option(enterprise.name, enterprise.id);
+                const option2 = new Option(enterprise.name, enterprise.id);
+                permissionEnterpriseFilter.add(option1);
+                accessEnterpriseFilter.add(option2);
+            });
+            
+            // 填充权限配置模态框的企业选项
+            const permissionEnterprise = document.getElementById('permissionEnterprise');
+            enterprisesData.filter(e => e.status === 'active').forEach(enterprise => {
+                const option = new Option(enterprise.name, enterprise.id);
+                permissionEnterprise.add(option);
+            });
+        }
+
+        // 侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+            
+            if (sidebar.classList.contains('sidebar-expanded')) {
+                sidebar.classList.remove('sidebar-expanded');
+                sidebar.classList.add('sidebar-collapsed');
+                mainContent.classList.remove('ml-60');
+                mainContent.classList.add('ml-20');
+                sidebarTexts.forEach(text => text.style.display = 'none');
+            } else {
+                sidebar.classList.remove('sidebar-collapsed');
+                sidebar.classList.add('sidebar-expanded');
+                mainContent.classList.remove('ml-20');
+                mainContent.classList.add('ml-60');
+                sidebarTexts.forEach(text => text.style.display = 'inline');
+            }
+        }
+
+        // 标签切换功能
+        function initTabSwitching() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const contentPanels = document.querySelectorAll('.content-panel');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetPanel = this.dataset.tab + '-panel';
+                    
+                    // 重置所有标签状态
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active', 'text-primary', 'border-b-2', 'border-primary', 'bg-gradient-to-b', 'from-blue-50', 'to-white');
+                        btn.classList.add('text-gray-600');
+                    });
+                    
+                    // 激活当前标签
+                    this.classList.add('tab-active');
+                    this.classList.remove('text-gray-600');
+                    
+                    // 隐藏所有面板
+                    contentPanels.forEach(panel => {
+                        panel.classList.add('hidden');
+                    });
+                    
+                    // 显示目标面板
+                    const panel = document.getElementById(targetPanel);
+                    if (panel) {
+                        panel.classList.remove('hidden');
+                    }
+                });
+            });
+        }
+
+        // 渲染企业列表
+        function renderEnterprises(filteredData = null) {
+            const tbody = document.getElementById('enterpriseTableBody');
+            const data = filteredData || enterprisesData;
+            
+            tbody.innerHTML = '';
+            
+            data.forEach(enterprise => {
+                const statusClass = enterprise.status === 'active' ? 'bg-green-100 text-green-800' : 
+                                  enterprise.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                  'bg-red-100 text-red-800';
+                const statusText = enterprise.status === 'active' ? '活跃' : 
+                                 enterprise.status === 'pending' ? '待审核' : '暂停';
+                
+                const permissionCount = permissionsData.filter(p => p.enterpriseId === enterprise.id).length;
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div>
+                            <div class="font-medium text-gray-900">${enterprise.name}</div>
+                            <div class="text-sm text-gray-500">${enterprise.contact} | ${enterprise.email}</div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${enterprise.industry}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 ${statusClass} rounded-full text-xs font-medium">${statusText}</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${permissionCount}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${enterprise.createTime}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${enterprise.expireTime}</td>
+                    <td class="px-6 py-4 text-sm">
+                        <div class="flex space-x-2">
+                            <button class="text-primary hover:text-primary-dark" onclick="editEnterprise(${enterprise.id})">编辑</button>
+                            <button class="text-green-600 hover:text-green-800" onclick="configurePermissions(${enterprise.id})">权限</button>
+                            <button class="text-red-600 hover:text-red-800" onclick="deleteEnterprise(${enterprise.id})">删除</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // 更新企业计数
+            document.getElementById('enterpriseCount').textContent = data.length;
+        }
+
+        // 渲染权限列表
+        function renderPermissions(filteredData = null) {
+            const tbody = document.getElementById('permissionTableBody');
+            const data = filteredData || permissionsData;
+            
+            tbody.innerHTML = '';
+            
+            data.forEach(permission => {
+                const statusClass = permission.status === 'active' ? 'bg-green-100 text-green-800' : 
+                                  permission.status === 'expired' ? 'bg-red-100 text-red-800' : 
+                                  'bg-gray-100 text-gray-800';
+                const statusText = permission.status === 'active' ? '活跃' : 
+                                 permission.status === 'expired' ? '已过期' : '已禁用';
+                
+                const permissionTypeText = permission.permissionType === 'read' ? '只读' :
+                                         permission.permissionType === 'export' ? '导出' : '同步';
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm font-medium">${permission.enterpriseName}</td>
+                    <td class="px-4 py-3 text-sm">${permission.tableName}</td>
+                    <td class="px-4 py-3 text-sm">${permissionTypeText}</td>
+                    <td class="px-4 py-3 text-sm">${permission.startTime}</td>
+                    <td class="px-4 py-3 text-sm">${permission.endTime}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 ${statusClass} rounded-full text-xs">${statusText}</span>
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                        <div class="flex space-x-2">
+                            <button class="text-primary hover:text-primary-dark" onclick="editPermission(${permission.id})">编辑</button>
+                            <button class="text-red-600 hover:text-red-800" onclick="revokePermission(${permission.id})">撤销</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 渲染访问记录
+        function renderAccessLogs(filteredData = null) {
+            const tbody = document.getElementById('accessTableBody');
+            const data = filteredData || accessLogsData;
+            
+            tbody.innerHTML = '';
+            
+            data.forEach(log => {
+                const statusClass = log.status === '成功' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm">${log.time}</td>
+                    <td class="px-4 py-3 text-sm font-medium">${log.enterpriseName}</td>
+                    <td class="px-4 py-3 text-sm">${log.tableName}</td>
+                    <td class="px-4 py-3 text-sm">${log.operation}</td>
+                    <td class="px-4 py-3 text-sm">${log.recordCount.toLocaleString()}</td>
+                    <td class="px-4 py-3 text-sm">${log.ip}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 ${statusClass} rounded-full text-xs">${log.status}</span>
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                        <button class="text-primary hover:text-primary-dark" onclick="viewAccessDetail(${log.id})">详情</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 更新统计数据
+        function updateStatistics() {
+            document.getElementById('totalEnterprises').textContent = enterprisesData.length;
+            
+            // 计算共享数据表数量
+            const sharedTables = new Set(permissionsData.map(p => p.tableName)).size;
+            document.getElementById('totalTables').textContent = sharedTables;
+            
+            document.getElementById('totalPermissions').textContent = permissionsData.length;
+            document.getElementById('totalAccess').textContent = accessLogsData.length.toLocaleString();
+        }
+
+        // 搜索和筛选功能
+        function searchEnterprises() {
+            const searchTerm = document.getElementById('enterpriseSearch').value.toLowerCase();
+            const filtered = enterprisesData.filter(enterprise => 
+                enterprise.name.toLowerCase().includes(searchTerm) ||
+                enterprise.contact.toLowerCase().includes(searchTerm)
+            );
+            renderEnterprises(filtered);
+        }
+
+        function filterEnterprises() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const industryFilter = document.getElementById('industryFilter').value;
+            
+            let filtered = enterprisesData;
+            
+            if (statusFilter) {
+                filtered = filtered.filter(enterprise => enterprise.status === statusFilter);
+            }
+            
+            if (industryFilter) {
+                filtered = filtered.filter(enterprise => enterprise.industry === industryFilter);
+            }
+            
+            renderEnterprises(filtered);
+        }
+
+        function filterPermissions() {
+            const enterpriseFilter = document.getElementById('permissionEnterpriseFilter').value;
+            const tableFilter = document.getElementById('permissionTableFilter').value;
+            const statusFilter = document.getElementById('permissionStatusFilter').value;
+            
+            let filtered = permissionsData;
+            
+            if (enterpriseFilter) {
+                filtered = filtered.filter(permission => permission.enterpriseId == enterpriseFilter);
+            }
+            
+            if (tableFilter) {
+                filtered = filtered.filter(permission => permission.tableName === tableFilter);
+            }
+            
+            if (statusFilter) {
+                filtered = filtered.filter(permission => permission.status === statusFilter);
+            }
+            
+            renderPermissions(filtered);
+        }
+
+        function filterAccessLogs() {
+            const dateFilter = document.getElementById('accessDateFilter').value;
+            const enterpriseFilter = document.getElementById('accessEnterpriseFilter').value;
+            
+            let filtered = accessLogsData;
+            
+            if (dateFilter) {
+                filtered = filtered.filter(log => log.time.startsWith(dateFilter));
+            }
+            
+            if (enterpriseFilter) {
+                filtered = filtered.filter(log => log.enterpriseId == enterpriseFilter);
+            }
+            
+            renderAccessLogs(filtered);
+        }
+
+        // 模态框操作
+        let editingEnterpriseId = null;
+        let editingPermissionId = null;
+
+        function openEnterpriseModal() {
+            editingEnterpriseId = null;
+            document.getElementById('enterpriseModalTitle').textContent = '新增合作企业';
+            document.getElementById('enterpriseForm').reset();
+            setTodayDate();
+            document.getElementById('enterpriseModal').classList.remove('hidden');
+        }
+
+        function closeEnterpriseModal() {
+            document.getElementById('enterpriseModal').classList.add('hidden');
+        }
+
+        function openPermissionModal() {
+            editingPermissionId = null;
+            document.getElementById('permissionForm').reset();
+            setTodayDate();
+            document.getElementById('permissionModal').classList.remove('hidden');
+        }
+
+        function closePermissionModal() {
+            document.getElementById('permissionModal').classList.add('hidden');
+        }
+
+        // 企业管理操作
+        function saveEnterprise(event) {
+            event.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('enterpriseName').value,
+                industry: document.getElementById('enterpriseIndustry').value,
+                contact: document.getElementById('enterpriseContact').value,
+                email: document.getElementById('enterpriseEmail').value,
+                expireTime: document.getElementById('enterpriseExpiry').value,
+                description: document.getElementById('enterpriseDescription').value
+            };
+            
+            if (editingEnterpriseId) {
+                // 编辑现有企业
+                const enterprise = enterprisesData.find(e => e.id === editingEnterpriseId);
+                Object.assign(enterprise, formData);
+                showNotification('更新成功', `企业 ${formData.name} 信息已更新`, 'success');
+            } else {
+                // 新增企业
+                const newEnterprise = {
+                    id: Math.max(...enterprisesData.map(e => e.id)) + 1,
+                    ...formData,
+                    status: 'pending',
+                    createTime: new Date().toISOString().split('T')[0]
+                };
+                enterprisesData.push(newEnterprise);
+                showNotification('添加成功', `企业 ${formData.name} 已添加`, 'success');
+            }
+            
+            renderEnterprises();
+            updateStatistics();
+            populateFilterOptions();
+            closeEnterpriseModal();
+        }
+
+        function editEnterprise(id) {
+            const enterprise = enterprisesData.find(e => e.id === id);
+            if (!enterprise) return;
+            
+            editingEnterpriseId = id;
+            document.getElementById('enterpriseModalTitle').textContent = '编辑合作企业';
+            document.getElementById('enterpriseName').value = enterprise.name;
+            document.getElementById('enterpriseIndustry').value = enterprise.industry;
+            document.getElementById('enterpriseContact').value = enterprise.contact;
+            document.getElementById('enterpriseEmail').value = enterprise.email;
+            document.getElementById('enterpriseExpiry').value = enterprise.expireTime;
+            document.getElementById('enterpriseDescription').value = enterprise.description || '';
+            
+            document.getElementById('enterpriseModal').classList.remove('hidden');
+        }
+
+        function deleteEnterprise(id) {
+            const enterprise = enterprisesData.find(e => e.id === id);
+            if (!enterprise) return;
+            
+            if (confirm(`确定要删除企业 "${enterprise.name}" 吗？删除后相关权限和访问记录也将被清理。`)) {
+                // 删除企业
+                const enterpriseIndex = enterprisesData.findIndex(e => e.id === id);
+                enterprisesData.splice(enterpriseIndex, 1);
+                
+                // 删除相关权限
+                permissionsData = permissionsData.filter(p => p.enterpriseId !== id);
+                
+                // 删除相关访问记录
+                accessLogsData = accessLogsData.filter(a => a.enterpriseId !== id);
+                
+                renderEnterprises();
+                renderPermissions();
+                renderAccessLogs();
+                updateStatistics();
+                populateFilterOptions();
+                
+                showNotification('删除成功', `企业 ${enterprise.name} 已删除`, 'success');
+            }
+        }
+
+        // 权限管理操作
+        function configurePermissions(id) {
+            const enterprise = enterprisesData.find(e => e.id === id);
+            if (!enterprise) return;
+            
+            document.getElementById('permissionEnterprise').value = id;
+            openPermissionModal();
+        }
+
+        function savePermission(event) {
+            event.preventDefault();
+            
+            const formData = {
+                enterpriseId: parseInt(document.getElementById('permissionEnterprise').value),
+                tableName: document.getElementById('permissionTable').value,
+                permissionType: document.getElementById('permissionType').value,
+                startTime: document.getElementById('permissionStartTime').value,
+                endTime: document.getElementById('permissionEndTime').value,
+                dailyLimit: parseInt(document.getElementById('permissionDailyLimit').value) || 1000,
+                rowLimit: parseInt(document.getElementById('permissionRowLimit').value) || 10000
+            };
+            
+            const enterprise = enterprisesData.find(e => e.id === formData.enterpriseId);
+            formData.enterpriseName = enterprise.name;
+            formData.status = 'active';
+            
+            if (editingPermissionId) {
+                // 编辑现有权限
+                const permission = permissionsData.find(p => p.id === editingPermissionId);
+                Object.assign(permission, formData);
+                showNotification('更新成功', '权限配置已更新', 'success');
+            } else {
+                // 新增权限
+                const newPermission = {
+                    id: Math.max(...permissionsData.map(p => p.id)) + 1,
+                    ...formData
+                };
+                permissionsData.push(newPermission);
+                showNotification('配置成功', `已为 ${enterprise.name} 配置 ${formData.tableName} 访问权限`, 'success');
+            }
+            
+            renderPermissions();
+            updateStatistics();
+            closePermissionModal();
+        }
+
+        function editPermission(id) {
+            const permission = permissionsData.find(p => p.id === id);
+            if (!permission) return;
+            
+            editingPermissionId = id;
+            document.getElementById('permissionEnterprise').value = permission.enterpriseId;
+            document.getElementById('permissionTable').value = permission.tableName;
+            document.getElementById('permissionType').value = permission.permissionType;
+            document.getElementById('permissionStartTime').value = permission.startTime;
+            document.getElementById('permissionEndTime').value = permission.endTime;
+            document.getElementById('permissionDailyLimit').value = permission.dailyLimit;
+            document.getElementById('permissionRowLimit').value = permission.rowLimit;
+            
+            document.getElementById('permissionModal').classList.remove('hidden');
+        }
+
+        function revokePermission(id) {
+            if (confirm('确定要撤销这个权限吗？撤销后企业将无法访问相关数据表。')) {
+                const permissionIndex = permissionsData.findIndex(p => p.id === id);
+                if (permissionIndex !== -1) {
+                    const permission = permissionsData[permissionIndex];
+                    permissionsData.splice(permissionIndex, 1);
+                    
+                    renderPermissions();
+                    updateStatistics();
+                    showNotification('撤销成功', `${permission.enterpriseName} 的 ${permission.tableName} 访问权限已撤销`, 'success');
+                }
+            }
+        }
+
+        // 数据表树形结构操作
+        function toggleTreeNode(element) {
+            const chevron = element.querySelector('.fas');
+            const folder = element.querySelectorAll('i')[1];
+            
+            if (chevron.classList.contains('fa-chevron-down')) {
+                chevron.classList.remove('fa-chevron-down');
+                chevron.classList.add('fa-chevron-right');
+                folder.classList.remove('fa-folder-open');
+                folder.classList.add('fa-folder');
+                element.nextElementSibling.style.display = 'none';
+            } else {
+                chevron.classList.remove('fa-chevron-right');
+                chevron.classList.add('fa-chevron-down');
+                folder.classList.remove('fa-folder');
+                folder.classList.add('fa-folder-open');
+                element.nextElementSibling.style.display = 'block';
+            }
+        }
+
+        function selectTable(tableName) {
+            // 移除所有活跃状态
+            document.querySelectorAll('.tree-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 激活当前选中的表
+            event.target.closest('.tree-item').classList.add('active');
+            
+            // 显示表详情
+            showTableDetail(tableName);
+        }
+
+        function showTableDetail(tableName) {
+            const tableDetail = tableDetailsData[tableName];
+            if (!tableDetail) return;
+            
+            const content = `
+                <div class="space-y-6">
+                    <!-- 基本信息 -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">${tableDetail.displayName}</h2>
+                                <p class="text-gray-600 mt-1">${tableDetail.description}</p>
+                            </div>
+                            <span class="px-3 py-1 ${tableDetail.accessLevel === '机密' ? 'bg-red-100 text-red-800' : 
+                                                    tableDetail.accessLevel === '敏感' ? 'bg-yellow-100 text-yellow-800' : 
+                                                    'bg-blue-100 text-blue-800'} rounded-full text-sm">${tableDetail.accessLevel}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 统计信息 -->
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="bg-gray-50 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-gray-800">${tableDetail.recordCount}</div>
+                            <div class="text-sm text-gray-600">记录数</div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-gray-800">${tableDetail.fields.length}</div>
+                            <div class="text-sm text-gray-600">字段数</div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-gray-800">${tableDetail.sharingEnterprises.length}</div>
+                            <div class="text-sm text-gray-600">共享企业</div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-gray-800">${tableDetail.owner}</div>
+                            <div class="text-sm text-gray-600">数据负责人</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 字段信息 -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-800 mb-3">字段结构</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr class="text-left text-sm text-gray-600">
+                                        <th class="px-4 py-2 font-medium">字段名</th>
+                                        <th class="px-4 py-2 font-medium">数据类型</th>
+                                        <th class="px-4 py-2 font-medium">描述</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    ${tableDetail.fields.map(field => `
+                                        <tr>
+                                            <td class="px-4 py-2 text-sm font-medium">${field.name}</td>
+                                            <td class="px-4 py-2 text-sm">${field.type}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-600">${field.description}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- 共享企业 -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-800 mb-3">数据共享企业</h3>
+                        <div class="flex flex-wrap gap-2">
+                            ${tableDetail.sharingEnterprises.map(enterprise => `
+                                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">${enterprise}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="flex space-x-3 pt-4 border-t border-gray-200">
+                        <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark" onclick="configureTablePermission('${tableName}')">
+                            <i class="fas fa-key mr-2"></i>配置权限
+                        </button>
+                        <button class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700" onclick="viewTableAccess('${tableName}')">
+                            <i class="fas fa-eye mr-2"></i>查看访问记录
+                        </button>
+                        <button class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700" onclick="exportTableInfo('${tableName}')">
+                            <i class="fas fa-download mr-2"></i>导出信息
+                        </button>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 mt-4">
+                        最后更新时间: ${tableDetail.updateTime}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('tableDetailContent').innerHTML = content;
+        }
+
+        function configureTablePermission(tableName) {
+            document.getElementById('permissionTable').value = tableName;
+            openPermissionModal();
+        }
+
+        function viewTableAccess(tableName) {
+            // 切换到访问记录标签页
+            document.querySelector('[data-tab="access"]').click();
+            // 筛选该表的访问记录
+            setTimeout(() => {
+                const filtered = accessLogsData.filter(log => log.tableName === tableName);
+                renderAccessLogs(filtered);
+            }, 100);
+        }
+
+        function exportTableInfo(tableName) {
+            const tableDetail = tableDetailsData[tableName];
+            if (!tableDetail) return;
+            
+            const blob = new Blob([JSON.stringify(tableDetail, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${tableName}_信息表_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('导出成功', `${tableDetail.displayName} 信息已导出`, 'success');
+        }
+
+        // 访问记录详情
+        function viewAccessDetail(id) {
+            const log = accessLogsData.find(l => l.id === id);
+            if (!log) return;
+            
+            const detail = `访问详情:
+
+时间: ${log.time}
+企业: ${log.enterpriseName}
+数据表: ${log.tableName}
+操作: ${log.operation}
+记录数: ${log.recordCount.toLocaleString()}
+IP地址: ${log.ip}
+状态: ${log.status}${log.status === '权限拒绝' ? '拒绝原因: 企业权限未激活或已过期' : ''}`;
+            
+            alert(detail);
+        }
+
+        // 导出功能
+        function exportReport() {
+            const reportData = {
+                enterprises: enterprisesData.length,
+                permissions: permissionsData.length,
+                accessLogs: accessLogsData.length,
+                statistics: {
+                    activeEnterprises: enterprisesData.filter(e => e.status === 'active').length,
+                    sharedTables: new Set(permissionsData.map(p => p.tableName)).size,
+                    successfulAccess: accessLogsData.filter(a => a.status === '成功').length
+                },
+                exportTime: new Date().toISOString(),
+                data: {
+                    enterprises: enterprisesData,
+                    permissions: permissionsData,
+                    accessLogs: accessLogsData
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `合作企业管理报告_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('导出成功', '合作企业管理报告已导出', 'success');
+        }
+
+        function exportAccessLogs() {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "访问时间,企业名称,数据表,操作类型,记录数,IP地址,状态"
+                + accessLogsData.map(log => `${log.time},${log.enterpriseName},${log.tableName},${log.operation},${log.recordCount},${log.ip},${log.status}`).join('\n');
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `访问记录_${new Date().toISOString().split('T')[0]}.csv`);
+            link.click();
+            
+            showNotification('导出成功', '访问记录已导出', 'success');
+        }
+
+        // 刷新数据
+        function refreshData() {
+            renderEnterprises();
+            renderPermissions();
+            renderAccessLogs();
+            updateStatistics();
+            showNotification('刷新成功', '数据已更新', 'success');
+        }
+
+        // 通知系统
+        function showNotification(title, message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const titleEl = document.getElementById('notificationTitle');
+            const messageEl = document.getElementById('notificationMessage');
+            const iconEl = document.getElementById('notificationIcon');
+            
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            
+            // 根据类型设置图标和颜色
+            switch (type) {
+                case 'success':
+                    iconEl.className = 'w-8 h-8 rounded-full bg-green-500 flex items-center justify-center mr-3';
+                    iconEl.innerHTML = '<i class="fas fa-check text-white"></i>';
+                    break;
+                case 'error':
+                    iconEl.className = 'w-8 h-8 rounded-full bg-red-500 flex items-center justify-center mr-3';
+                    iconEl.innerHTML = '<i class="fas fa-times text-white"></i>';
+                    break;
+                case 'warning':
+                    iconEl.className = 'w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center mr-3';
+                    iconEl.innerHTML = '<i class="fas fa-exclamation text-white"></i>';
+                    break;
+                default:
+                    iconEl.className = 'w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center mr-3';
+                    iconEl.innerHTML = '<i class="fas fa-info text-white"></i>';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // 帮助和通知
+        function showHelp() {
+            const helpContent = `合作企业管理系统帮助：
+\n1. 企业管理：添加、编辑、删除合作企业信息
+2. 权限配置：为企业配置数据表访问权限
+3. 访问记录：实时监控企业数据访问情况
+4. 数据资产：查看可共享的数据表结构
+\n如有问题请联系系统管理员。`;
+            alert(helpContent);
+        }
+
+        function showNotifications() {
+            const notifications = [
+                { title: '权限即将过期', message: '字节跳动的数据访问权限将于3天后过期', time: '2小时前' },
+                { title: '新的合作申请', message: '比亚迪股份申请数据合作权限', time: '1天前' }
+            ];
+            
+            let notificationHtml = '系统通知：\n';
+            notifications.forEach(notif => {
+                notificationHtml += `${notif.title} (${notif.time})\n${notif.message}
+\n`;
+            });
+            
+            alert(notificationHtml);
+        }
+    </script>
+</body>
+</html>

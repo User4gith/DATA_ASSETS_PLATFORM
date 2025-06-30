@@ -118,9 +118,9 @@
                 </button>
                 
                 <!-- 帮助文档 -->
-                <button class="p-2 text-gray-600 hover:text-primary transition-colors">
+                <!-- <button class="p-2 text-gray-600 hover:text-primary transition-colors">
                     <i class="fas fa-question-circle text-lg"></i>
-                </button>
+                </button> -->
                 
                 <!-- 消息通知 -->
                 <button class="p-2 text-gray-600 hover:text-primary transition-colors relative">
@@ -129,40 +129,75 @@
                 </button>
 
                 <!-- 用户信息 -->
-                <div class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 px-2 md:px-3 py-2 rounded-lg transition-colors">
+                <!-- <div class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 px-2 md:px-3 py-2 rounded-lg transition-colors">
                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                         <span class="text-white text-sm font-medium">张</span>
                     </div>
                     <span class="text-gray-800 font-medium hidden sm:block">张三</span>
                     <i class="fas fa-chevron-down text-gray-400 text-sm hidden sm:block"></i>
+                </div> -->
+
+                <div class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 px-2 md:px-3 py-2 rounded-lg transition-colors" onclick="goToProfile()">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm font-medium">张</span>
+                    </div>
+                    <span class="text-gray-800 font-medium hidden sm:block">张三</span>
+                    <!-- <i class="fas fa-chevron-down text-gray-400 text-sm hidden sm:block"></i> -->
                 </div>
+
+
             </div>
         </div>
     </header>
 
     <div class="flex pt-16">
         <!-- 左侧菜单栏 -->
-        <aside id="sidebar" class="sidebar-expanded bg-white border-r border-gray-200 fixed left-0 top-16 bottom-0 z-40 transition-all duration-300">
-            <nav class="p-4 space-y-2">
-                <a href="index.html" class="flex items-center space-x-3 px-3 py-2 bg-primary text-white rounded-lg">
-                    <i class="fas fa-tachometer-alt w-5"></i>
-                    <span class="sidebar-text">首页仪表盘</span>
+        <aside id="sidebar" class="fixed left-0 top-16 h-full bg-white shadow-lg transition-all duration-300 sidebar-expanded z-20">
+            <nav class="mt-4">
+                <!-- 主要功能 -->
+                <div class="px-4 py-2">
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-text">主要功能</div>
+                </div>
+                
+                <a href="index.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-home w-5"></i>
+                    <span class="sidebar-text">首页概览</span>
                 </a>
-                <a href="data_map.html" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                
+                <a href="data_map.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                     <i class="fas fa-database w-5"></i>
                     <span class="sidebar-text">数据资产中心</span>
                 </a>
-                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+        
+                <!-- 数据合作 -->
+                <div class="px-4 py-2 mt-4">
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-text">数据合作</div>
+                </div>
+                
+                <a href="data_map_coop.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-share-alt w-5"></i>
+                    <span class="sidebar-text">开放数据资产</span>
+                </a>
+
+                <a href="data_comp_mg4.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-handshake w-5"></i>
+                    <span class="sidebar-text">合作企业管理</span>
+                </a>
+        
+                <!-- 其他功能 -->
+                <!-- <a href="#" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
                     <i class="fas fa-chart-bar w-5"></i>
                     <span class="sidebar-text">统计与报表</span>
                     <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
                 </a>
-                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+                
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
                     <i class="fas fa-exclamation-triangle w-5"></i>
                     <span class="sidebar-text">监控与告警</span>
                     <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                </a> -->
+                
+                <a href="system.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                     <i class="fas fa-cog w-5"></i>
                     <span class="sidebar-text">系统管理</span>
                 </a>
@@ -311,7 +346,7 @@
                                     <div class="flex items-center space-x-4">
                                         <div class="w-8 h-8 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-sm font-bold rounded-full flex items-center justify-center">1</div>
                                         <div>
-                                            <div class="font-semibold text-gray-800">用户数据</div>
+                                            <div class="font-semibold text-gray-800">产业链数据</div>
                                             <div class="text-sm text-gray-500">总数: 234 | 核心: 45 | 存储: 8.5TB</div>
                                         </div>
                                     </div>
@@ -329,7 +364,7 @@
                                     <div class="flex items-center space-x-4">
                                         <div class="w-8 h-8 bg-gradient-to-r from-gray-400 to-gray-500 text-white text-sm font-bold rounded-full flex items-center justify-center">2</div>
                                         <div>
-                                            <div class="font-semibold text-gray-800">订单数据</div>
+                                            <div class="font-semibold text-gray-800">专利数据</div>
                                             <div class="text-sm text-gray-500">总数: 189 | 核心: 32 | 存储: 6.8TB</div>
                                         </div>
                                     </div>
@@ -347,7 +382,7 @@
                                     <div class="flex items-center space-x-4">
                                         <div class="w-8 h-8 bg-gradient-to-r from-orange-400 to-orange-500 text-white text-sm font-bold rounded-full flex items-center justify-center">3</div>
                                         <div>
-                                            <div class="font-semibold text-gray-800">商品数据</div>
+                                            <div class="font-semibold text-gray-800">科技企业画像</div>
                                             <div class="text-sm text-gray-500">总数: 156 | 核心: 28 | 存储: 4.2TB</div>
                                         </div>
                                     </div>
@@ -365,7 +400,7 @@
                                     <div class="flex items-center space-x-4">
                                         <div class="w-8 h-8 bg-gray-400 text-white text-sm font-bold rounded-full flex items-center justify-center">4</div>
                                         <div>
-                                            <div class="font-semibold text-gray-800">财务数据</div>
+                                            <div class="font-semibold text-gray-800">专家画像</div>
                                             <div class="text-sm text-gray-500">总数: 123 | 核心: 25 | 存储: 3.8TB</div>
                                         </div>
                                     </div>
@@ -382,7 +417,7 @@
                                     <div class="flex items-center space-x-4">
                                         <div class="w-8 h-8 bg-gray-400 text-white text-sm font-bold rounded-full flex items-center justify-center">5</div>
                                         <div>
-                                            <div class="font-semibold text-gray-800">营销数据</div>
+                                            <div class="font-semibold text-gray-800">科研机构画像</div>
                                             <div class="text-sm text-gray-500">总数: 98 | 核心: 18 | 存储: 2.9TB</div>
                                         </div>
                                     </div>
@@ -399,7 +434,7 @@
                                     <div class="flex items-center space-x-4">
                                         <div class="w-8 h-8 bg-gray-400 text-white text-sm font-bold rounded-full flex items-center justify-center">6</div>
                                         <div>
-                                            <div class="font-semibold text-gray-800">运营数据</div>
+                                            <div class="font-semibold text-gray-800">技术画像</div>
                                             <div class="text-sm text-gray-500">总数: 87 | 核心: 15 | 存储: 2.1TB</div>
                                         </div>
                                     </div>
@@ -416,7 +451,7 @@
                                     <div class="flex items-center space-x-4">
                                         <div class="w-8 h-8 bg-gray-400 text-white text-sm font-bold rounded-full flex items-center justify-center">7</div>
                                         <div>
-                                            <div class="font-semibold text-gray-800">供应链数据</div>
+                                            <div class="font-semibold text-gray-800">新闻科技知识图谱</div>
                                             <div class="text-sm text-gray-500">总数: 76 | 核心: 12 | 存储: 1.8TB</div>
                                         </div>
                                     </div>
@@ -433,7 +468,7 @@
                                     <div class="flex items-center space-x-4">
                                         <div class="w-8 h-8 bg-gray-400 text-white text-sm font-bold rounded-full flex items-center justify-center">8</div>
                                         <div>
-                                            <div class="font-semibold text-gray-800">人力资源数据</div>
+                                            <div class="font-semibold text-gray-800">科技知识图谱</div>
                                             <div class="text-sm text-gray-500">总数: 65 | 核心: 10 | 存储: 1.2TB</div>
                                         </div>
                                     </div>
@@ -450,7 +485,7 @@
                                     <div class="flex items-center space-x-4">
                                         <div class="w-8 h-8 bg-gray-400 text-white text-sm font-bold rounded-full flex items-center justify-center">9</div>
                                         <div>
-                                            <div class="font-semibold text-gray-800">风控数据</div>
+                                            <div class="font-semibold text-gray-800">产业数据知识图谱</div>
                                             <div class="text-sm text-gray-500">总数: 54 | 核心: 8 | 存储: 0.9TB</div>
                                         </div>
                                     </div>
@@ -467,7 +502,7 @@
                                     <div class="flex items-center space-x-4">
                                         <div class="w-8 h-8 bg-gray-400 text-white text-sm font-bold rounded-full flex items-center justify-center">10</div>
                                         <div>
-                                            <div class="font-semibold text-gray-800">日志数据</div>
+                                            <div class="font-semibold text-gray-800">新闻资讯</div>
                                             <div class="text-sm text-gray-500">总数: 43 | 核心: 6 | 存储: 0.7TB</div>
                                         </div>
                                     </div>
@@ -486,7 +521,7 @@
                         <div class="bg-white rounded-xl card-shadow p-6">
                             <div class="flex items-center justify-between mb-6">
                                 <h3 class="text-lg font-semibold text-gray-800">我的工作台</h3>
-                                <button class="text-primary text-sm hover:text-primary-dark">查看全部</button>
+                                <button class="text-primary text-sm hover:text-primary-dark" onclick="goToProfile()">查看全部</button>
                             </div>
                             
                             <!-- 标签页 -->
@@ -499,10 +534,10 @@
                                     待我处理
                                     <span class="ml-1 bg-warning text-white text-xs px-1.5 py-0.5 rounded-full">5</span>
                                 </button>
-                                <button class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm ml-6">
+                                <!-- <button class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm ml-6">
                                     我的关注
                                     <span class="ml-1 bg-gray-400 text-white text-xs px-1.5 py-0.5 rounded-full">3</span>
-                                </button>
+                                </button> -->
                             </div>
                             
                             <!-- 任务列表 -->
@@ -510,7 +545,7 @@
                                 <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
                                     <div>
                                         <div class="text-sm font-medium text-gray-800">李四申请用户行为表查看权限</div>
-                                        <div class="text-xs text-gray-500 mt-1">申请时间: 2小时前 | 紧急程度: 普通</div>
+                                        <div class="text-xs text-gray-500 mt-1">申请时间: 2小时前</div>
                                     </div>
                                     <div class="flex space-x-2">
                                         <button class="px-3 py-1 bg-success text-white text-xs rounded hover:bg-green-600">
@@ -524,7 +559,7 @@
                                 <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
                                     <div>
                                         <div class="text-sm font-medium text-gray-800">王五申请订单明细表编辑权限</div>
-                                        <div class="text-xs text-gray-500 mt-1">申请时间: 5小时前 | 紧急程度: 高</div>
+                                        <div class="text-xs text-gray-500 mt-1">申请时间: 5小时前</div>
                                     </div>
                                     <div class="flex space-x-2">
                                         <button class="px-3 py-1 bg-success text-white text-xs rounded hover:bg-green-600">
@@ -538,7 +573,7 @@
                                 <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
                                     <div>
                                         <div class="text-sm font-medium text-gray-800">赵六申请财务报表数据下载权限</div>
-                                        <div class="text-xs text-gray-500 mt-1">申请时间: 1天前 | 紧急程度: 普通</div>
+                                        <div class="text-xs text-gray-500 mt-1">申请时间: 1天前</div>
                                     </div>
                                     <div class="flex space-x-2">
                                         <button class="px-3 py-1 bg-success text-white text-xs rounded hover:bg-green-600">
@@ -1009,6 +1044,18 @@
                     }, 300); // 300毫秒延迟
                 });
             }
+        }
+
+
+        // 跳转到个人中心
+        function goToProfile() {
+            window.location.href = 'profile.html';
+        }
+
+        // 修改原有的工作台跳转函数
+        function goToWorkbench() {
+            // 直接跳转到个人中心的工作台标签
+            window.location.href = 'profile.html#workbench';
         }
 
         // 初始化搜索功能

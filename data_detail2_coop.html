@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数智之眼 - 数据详情</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1890ff',
+                        'primary-light': '#40a9ff',
+                        'primary-dark': '#096dd9',
+                        success: '#52c41a',
+                        warning: '#faad14',
+                        error: '#ff4d4f'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-collapsed { width: 80px; }
+        .sidebar-expanded { width: 240px; }
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .tab-active {
+            color: #1890ff;
+            border-bottom: 2px solid #1890ff;
+            background: linear-gradient(to bottom, #f0f9ff, #ffffff);
+        }
+        .breadcrumb-divider::after {
+            content: '/';
+            margin: 0 8px;
+            color: #d0d7de;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50 h-16">
+        <div class="flex items-center justify-between h-full px-6">
+            <div class="flex items-center">
+                <button id="sidebarToggleBtn" class="p-2 text-gray-600 hover:text-primary transition-colors mr-2" onclick="toggleSidebar()">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-eye text-white text-lg"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800 hidden sm:block">数智之眼</span>
+                </div>
+            </div>
+
+            <div class="flex-1 max-w-xl mx-4 hidden md:block">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        placeholder="搜索数据资产、表名、字段..." 
+                        class="w-full px-4 py-2 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button class="p-2 text-gray-600 hover:text-primary">
+                    <i class="fas fa-question-circle text-lg"></i>
+                </button>
+                <button class="p-2 text-gray-600 hover:text-primary relative">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                </button>
+                <div class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm font-medium">张</span>
+                    </div>
+                    <span class="text-gray-800 font-medium hidden sm:block">张三</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- 左侧菜单栏 -->
+        <!-- 左侧菜单栏 -->
+        <aside id="sidebar" class="fixed left-0 top-16 h-full bg-white shadow-lg transition-all duration-300 sidebar-expanded z-20">
+            <nav class="mt-4">
+                <!-- 主要功能 -->
+                <div class="px-4 py-2">
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-text">主要功能</div>
+                </div>
+                
+                <a href="index.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-home w-5"></i>
+                    <span class="sidebar-text">首页概览</span>
+                </a>
+                
+                <a href="data_map.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-database w-5"></i>
+                    <span class="sidebar-text">数据资产中心</span>
+                </a>
+        
+                <!-- 数据合作 -->
+                <div class="px-4 py-2 mt-4">
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-text">数据合作</div>
+                </div>
+                
+                <a href="data_map_coop.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-share-alt w-5"></i>
+                    <span class="sidebar-text">开放数据资产</span>
+                </a>
+
+                <a href="data_comp_mg4.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-handshake w-5"></i>
+                    <span class="sidebar-text">合作企业管理</span>
+                </a>
+        
+                <!-- 其他功能 -->
+                <!-- <a href="#" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-chart-bar w-5"></i>
+                    <span class="sidebar-text">统计与报表</span>
+                    <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
+                </a>
+                
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-exclamation-triangle w-5"></i>
+                    <span class="sidebar-text">监控与告警</span>
+                    <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
+                </a> -->
+                
+                <a href="system.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-cog w-5"></i>
+                    <span class="sidebar-text">系统管理</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main id="mainContent" class="flex-1 ml-60 transition-all duration-300">
+            <div class="p-6">
+                <!-- 面包屑导航 -->
+                <nav class="flex items-center text-sm text-gray-500 mb-4">
+                    <a href="index.html" class="hover:text-primary">
+                        <i class="fas fa-home mr-2"></i>
+                    </a>
+                    <a href="data_map_coop.html" class="hover:text-primary">
+                        <span class="breadcrumb-divider">数据合作</span>
+                    </a>
+                    <span>数据详情</span>
+                </nav>
+
+                <!-- 页面标题区域 -->
+                <div class="bg-white rounded-xl card-shadow p-6 mb-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start space-x-4">
+                            <!-- Hive图标 -->
+                            <div class="w-16 h-16 bg-yellow-400 rounded-xl flex items-center justify-center relative">
+                                <i class="fas fa-database text-white text-2xl"></i>
+                                <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-600">Hive</span>
+                            </div>
+                            
+                            <div class="flex-1 mt-2">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <h1 class="text-2xl font-bold text-gray-800">mammut_user.ods_sales_order</h1>
+                                    <i class="fas fa-star text-gray-300 cursor-pointer hover:text-yellow-500"></i>
+                                </div>
+                                
+                                <div class="flex items-center space-x-6 text-sm text-gray-600">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-medium">技术负责人:</span>
+                                        <span>zhang.san@company.com</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-medium">业务负责人:</span>
+                                        <span>李四</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 右侧统计信息 -->
+                        <!-- <div class="flex items-center space-x-6 text-sm">
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-gray-800">2</div>
+                                <div class="text-gray-500">收藏数</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-gray-800">156</div>
+                                <div class="text-gray-500">查看次数</div>
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+
+                <!-- 功能标签导航 -->
+                <div class="bg-white rounded-xl card-shadow mb-6">
+                    <div class="flex items-center px-6 pt-4 border-b border-gray-200">
+                        <div class="flex space-x-0">
+                            <button class="tab-button px-4 py-3 text-primary font-medium border-b-2 border-primary bg-gradient-to-b from-blue-50 to-white" data-tab="basic">基础信息</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="fields">字段结构</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="preview">数据预览</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 内容区域 -->
+                <div class="space-y-6">
+                    <!-- 基础信息面板 -->
+                    <div id="basic-panel" class="content-panel">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-6">基础信息</h3>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <!-- 左侧信息 -->
+                                <div class="space-y-4">
+                                    <div class="flex items-center">
+                                        <span class="w-24 text-gray-600 font-medium">数据库:</span>
+                                        <span class="text-gray-800">mammut_user</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-24 text-gray-600 font-medium">表名:</span>
+                                        <span class="text-gray-800">ods_sales_order</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-24 text-gray-600 font-medium">表类型:</span>
+                                        <span class="text-gray-800">外部表</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-24 text-gray-600 font-medium">存储格式:</span>
+                                        <span class="text-gray-800">Parquet</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-24 text-gray-600 font-medium">数据层级:</span>
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded">ODS</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- 右侧信息 -->
+                                <div class="space-y-4">
+                                    <div class="flex items-center">
+                                        <span class="w-24 text-gray-600 font-medium">创建时间:</span>
+                                        <span class="text-gray-800">2024-03-15 10:30:45</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-24 text-gray-600 font-medium">更新时间:</span>
+                                        <span class="text-gray-800">2024-12-20 16:25:12</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-24 text-gray-600 font-medium">数据量:</span>
+                                        <span class="text-gray-800">1,234,567 行</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-24 text-gray-600 font-medium">存储大小:</span>
+                                        <span class="text-gray-800">2.3 GB</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-24 text-gray-600 font-medium">分区字段:</span>
+                                        <span class="text-gray-800">pt (按日期分区)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 表描述 -->
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <div class="flex items-start">
+                                    <span class="w-24 text-gray-600 font-medium">表描述:</span>
+                                    <div class="flex-1">
+                                        <p class="text-gray-800">销售订单数据表，记录所有销售订单的基本信息，包括订单编码、客户信息、订单金额、订单日期等核心业务数据。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 字段结构面板 -->
+                    <div id="fields-panel" class="content-panel hidden">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800">字段结构</h3>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-500">共 6 个字段</span>
+                                    <input 
+                                        type="text" 
+                                        placeholder="搜索字段名"
+                                        class="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50">
+                                        <tr class="text-left text-sm text-gray-600">
+                                            <th class="px-4 py-3 font-medium">序号</th>
+                                            <th class="px-4 py-3 font-medium">字段名</th>
+                                            <th class="px-4 py-3 font-medium">数据类型</th>
+                                            <th class="px-4 py-3 font-medium">注释</th>
+                                            <th class="px-4 py-3 font-medium">是否为空</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">1</td>
+                                            <td class="px-4 py-3 text-sm font-medium text-blue-600">order_id</td>
+                                            <td class="px-4 py-3 text-sm">string</td>
+                                            <td class="px-4 py-3 text-sm">订单编号</td>
+                                            <td class="px-4 py-3 text-sm">否</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">2</td>
+                                            <td class="px-4 py-3 text-sm font-medium text-blue-600">customer_id</td>
+                                            <td class="px-4 py-3 text-sm">string</td>
+                                            <td class="px-4 py-3 text-sm">客户编号</td>
+                                            <td class="px-4 py-3 text-sm">否</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">3</td>
+                                            <td class="px-4 py-3 text-sm font-medium text-blue-600">product_name</td>
+                                            <td class="px-4 py-3 text-sm">string</td>
+                                            <td class="px-4 py-3 text-sm">产品名称</td>
+                                            <td class="px-4 py-3 text-sm">是</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">4</td>
+                                            <td class="px-4 py-3 text-sm font-medium text-blue-600">order_amount</td>
+                                            <td class="px-4 py-3 text-sm">decimal(10,2)</td>
+                                            <td class="px-4 py-3 text-sm">订单金额</td>
+                                            <td class="px-4 py-3 text-sm">否</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">5</td>
+                                            <td class="px-4 py-3 text-sm font-medium text-blue-600">order_date</td>
+                                            <td class="px-4 py-3 text-sm">date</td>
+                                            <td class="px-4 py-3 text-sm">订单日期</td>
+                                            <td class="px-4 py-3 text-sm">否</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">6</td>
+                                            <td class="px-4 py-3 text-sm font-medium text-blue-600">status</td>
+                                            <td class="px-4 py-3 text-sm">string</td>
+                                            <td class="px-4 py-3 text-sm">订单状态</td>
+                                            <td class="px-4 py-3 text-sm">否</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据预览面板 -->
+                    <div id="preview-panel" class="content-panel hidden">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800">数据预览</h3>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-500">显示前 10 条记录</span>
+                                    <button class="px-3 py-1 bg-primary text-white text-sm rounded hover:bg-primary-dark">刷新数据</button>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead class="bg-gray-50">
+                                        <tr class="text-left text-gray-600">
+                                            <th class="px-3 py-3 font-medium">order_id</th>
+                                            <th class="px-3 py-3 font-medium">customer_id</th>
+                                            <th class="px-3 py-3 font-medium">product_name</th>
+                                            <th class="px-3 py-3 font-medium">order_amount</th>
+                                            <th class="px-3 py-3 font-medium">order_date</th>
+                                            <th class="px-3 py-3 font-medium">status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-3 py-3">ORD20241201001</td>
+                                            <td class="px-3 py-3">CUST001</td>
+                                            <td class="px-3 py-3">智能手机X1</td>
+                                            <td class="px-3 py-3 text-right">3299.00</td>
+                                            <td class="px-3 py-3">2024-12-01</td>
+                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">已完成</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-3 py-3">ORD20241201002</td>
+                                            <td class="px-3 py-3">CUST002</td>
+                                            <td class="px-3 py-3">笔记本电脑Pro</td>
+                                            <td class="px-3 py-3 text-right">8999.00</td>
+                                            <td class="px-3 py-3">2024-12-01</td>
+                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">处理中</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-3 py-3">ORD20241202003</td>
+                                            <td class="px-3 py-3">CUST003</td>
+                                            <td class="px-3 py-3">无线耳机</td>
+                                            <td class="px-3 py-3 text-right">299.00</td>
+                                            <td class="px-3 py-3">2024-12-02</td>
+                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">已完成</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-3 py-3">ORD20241202004</td>
+                                            <td class="px-3 py-3">CUST004</td>
+                                            <td class="px-3 py-3">智能手表</td>
+                                            <td class="px-3 py-3 text-right">1999.00</td>
+                                            <td class="px-3 py-3">2024-12-02</td>
+                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">已发货</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-3 py-3">ORD20241203005</td>
+                                            <td class="px-3 py-3">CUST005</td>
+                                            <td class="px-3 py-3">平板电脑</td>
+                                            <td class="px-3 py-3 text-right">2599.00</td>
+                                            <td class="px-3 py-3">2024-12-03</td>
+                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">已完成</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-3 py-3">ORD20241203006</td>
+                                            <td class="px-3 py-3">CUST006</td>
+                                            <td class="px-3 py-3">游戏手柄</td>
+                                            <td class="px-3 py-3 text-right">199.00</td>
+                                            <td class="px-3 py-3">2024-12-03</td>
+                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">已取消</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-3 py-3">ORD20241204007</td>
+                                            <td class="px-3 py-3">CUST007</td>
+                                            <td class="px-3 py-3">显示器27寸</td>
+                                            <td class="px-3 py-3 text-right">1299.00</td>
+                                            <td class="px-3 py-3">2024-12-04</td>
+                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">处理中</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-3 py-3">ORD20241204008</td>
+                                            <td class="px-3 py-3">CUST008</td>
+                                            <td class="px-3 py-3">键盘机械版</td>
+                                            <td class="px-3 py-3 text-right">399.00</td>
+                                            <td class="px-3 py-3">2024-12-04</td>
+                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">已完成</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-3 py-3">ORD20241205009</td>
+                                            <td class="px-3 py-3">CUST009</td>
+                                            <td class="px-3 py-3">鼠标无线版</td>
+                                            <td class="px-3 py-3 text-right">99.00</td>
+                                            <td class="px-3 py-3">2024-12-05</td>
+                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">已发货</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-3 py-3">ORD20241205010</td>
+                                            <td class="px-3 py-3">CUST010</td>
+                                            <td class="px-3 py-3">充电器快充版</td>
+                                            <td class="px-3 py-3 text-right">59.00</td>
+                                            <td class="px-3 py-3">2024-12-05</td>
+                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">已完成</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- 数据统计 -->
+                            <!-- <div class="mt-6 pt-6 border-t border-gray-200">
+                                <div class="grid grid-cols-4 gap-4">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-gray-800">10</div>
+                                        <div class="text-sm text-gray-500">预览记录数</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-primary">18,590.00</div>
+                                        <div class="text-sm text-gray-500">订单总金额</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-success">7</div>
+                                        <div class="text-sm text-gray-500">已完成订单</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-warning">2</div>
+                                        <div class="text-sm text-gray-500">处理中订单</div>
+                                    </div>
+                                </div>
+                            </div> -->
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+            const toggleBtn = document.getElementById('sidebarToggleBtn');
+            
+            if (sidebar.classList.contains('sidebar-expanded')) {
+                sidebar.classList.remove('sidebar-expanded');
+                sidebar.classList.add('sidebar-collapsed');
+                mainContent.classList.remove('ml-60');
+                mainContent.classList.add('ml-20');
+                sidebarTexts.forEach(text => text.style.display = 'none');
+                toggleBtn.querySelector('i').classList.remove('fa-bars');
+                toggleBtn.querySelector('i').classList.add('fa-indent');
+            } else {
+                sidebar.classList.remove('sidebar-collapsed');
+                sidebar.classList.add('sidebar-expanded');
+                mainContent.classList.remove('ml-20');
+                mainContent.classList.add('ml-60');
+                sidebarTexts.forEach(text => text.style.display = 'inline');
+                toggleBtn.querySelector('i').classList.remove('fa-indent');
+                toggleBtn.querySelector('i').classList.add('fa-bars');
+            }
+        }
+
+        // 标签切换功能
+        function initTabSwitching() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const contentPanels = document.querySelectorAll('.content-panel');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetPanel = this.dataset.tab + '-panel';
+                    
+                    // 重置所有标签状态
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active', 'text-primary', 'border-b-2', 'border-primary', 'bg-gradient-to-b', 'from-blue-50', 'to-white');
+                        btn.classList.add('text-gray-600');
+                    });
+                    
+                    // 激活当前标签
+                    this.classList.add('tab-active');
+                    this.classList.remove('text-gray-600');
+                    
+                    // 隐藏所有面板
+                    contentPanels.forEach(panel => {
+                        panel.classList.add('hidden');
+                    });
+                    
+                    // 显示目标面板
+                    const panel = document.getElementById(targetPanel);
+                    if (panel) {
+                        panel.classList.remove('hidden');
+                    }
+                });
+            });
+        }
+
+        // 复制DDL语句
+        function copyDDL() {
+            const ddlContent = document.getElementById('ddl-content').innerText;
+            navigator.clipboard.writeText(ddlContent).then(function() {
+                // 简单的成功提示
+                const button = event.target.closest('button');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check mr-1"></i>已复制';
+                button.classList.add('bg-green-100', 'text-green-600');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-green-100', 'text-green-600');
+                }, 2000);
+            });
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTabSwitching();
+        });
+    </script>
+</body>
+</html>

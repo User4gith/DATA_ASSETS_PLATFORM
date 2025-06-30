@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数智之眼 - 外部合作管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1890ff',
+                        'primary-light': '#40a9ff',
+                        'primary-dark': '#096dd9',
+                        success: '#52c41a',
+                        warning: '#faad14',
+                        error: '#ff4d4f'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-collapsed { width: 80px; }
+        .sidebar-expanded { width: 240px; }
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .tab-active {
+            color: #1890ff;
+            border-bottom: 2px solid #1890ff;
+            background: linear-gradient(to bottom, #f0f9ff, #ffffff);
+        }
+        .breadcrumb-divider::after {
+            content: '/';
+            margin: 0 8px;
+            color: #d0d7de;
+        }
+        .partner-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .partner-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .status-active {
+            background: linear-gradient(135deg, #52c41a, #73d13d);
+        }
+        .status-pending {
+            background: linear-gradient(135deg, #faad14, #ffc53d);
+        }
+        .status-inactive {
+            background: linear-gradient(135deg, #ff4d4f, #ff7875);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50 h-16">
+        <div class="flex items-center justify-between h-full px-6">
+            <div class="flex items-center">
+                <button id="sidebarToggleBtn" class="p-2 text-gray-600 hover:text-primary transition-colors mr-2" onclick="toggleSidebar()">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+                <div class="flex items-center space-x-3">
+                    <a href="home4.html" class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-eye text-white text-lg"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-800 hidden sm:block">数智之眼</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="flex-1 max-w-xl mx-4 hidden md:block">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        placeholder="搜索合作伙伴、数据资产..." 
+                        class="w-full px-4 py-2 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button class="p-2 text-gray-600 hover:text-primary">
+                    <i class="fas fa-question-circle text-lg"></i>
+                </button>
+                <button class="p-2 text-gray-600 hover:text-primary relative">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                </button>
+                <div class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm font-medium">张</span>
+                    </div>
+                    <span class="text-gray-800 font-medium hidden sm:block">张三</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- 左侧菜单栏 -->
+        <aside id="sidebar" class="sidebar-expanded bg-white border-r border-gray-200 fixed left-0 top-16 bottom-0 z-40 transition-all duration-300">
+            <nav class="p-4 space-y-2">
+                <a href="home4.html" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-tachometer-alt w-5"></i>
+                    <span class="sidebar-text">首页仪表盘</span>
+                </a>
+                <a href="data_map.html" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-database w-5"></i>
+                    <span class="sidebar-text">数据资产中心</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 bg-primary text-white rounded-lg">
+                    <i class="fas fa-handshake w-5"></i>
+                    <span class="sidebar-text">外部合作管理</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-cog w-5"></i>
+                    <span class="sidebar-text">系统管理</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main id="mainContent" class="flex-1 ml-60 transition-all duration-300">
+            <div class="p-6">
+                <!-- 面包屑导航 -->
+                <nav class="flex items-center text-sm text-gray-500 mb-4">
+                    <a href="home4.html" class="hover:text-primary">
+                        <i class="fas fa-home mr-2"></i>
+                    </a>
+                    <span>外部合作管理</span>
+                </nav>
+
+                <!-- 页面标题 -->
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">外部合作管理</h1>
+                        <p class="text-gray-600 mt-1">管理外部企业合作伙伴的数据访问权限</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+                            <i class="fas fa-download mr-2"></i>导出报告
+                        </button>
+                        <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark" onclick="openPartnerModal()">
+                            <i class="fas fa-plus mr-2"></i>添加合作伙伴
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-blue-100 rounded-full">
+                                <i class="fas fa-building text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-2xl font-bold text-gray-800">12</p>
+                                <p class="text-gray-600 text-sm">合作企业</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-green-100 rounded-full">
+                                <i class="fas fa-database text-green-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-2xl font-bold text-gray-800">48</p>
+                                <p class="text-gray-600 text-sm">共享数据表</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-orange-100 rounded-full">
+                                <i class="fas fa-exchange-alt text-orange-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-2xl font-bold text-gray-800">156</p>
+                                <p class="text-gray-600 text-sm">本月API调用</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-purple-100 rounded-full">
+                                <i class="fas fa-shield-alt text-purple-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-2xl font-bold text-gray-800">98.5%</p>
+                                <p class="text-gray-600 text-sm">安全合规率</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 功能标签 -->
+                <div class="bg-white rounded-xl card-shadow mb-6">
+                    <div class="flex items-center px-6 pt-4 border-b border-gray-200">
+                        <div class="flex space-x-0">
+                            <button class="tab-button px-4 py-3 text-primary font-medium border-b-2 border-primary bg-gradient-to-b from-blue-50 to-white" data-tab="partners">合作伙伴</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="permissions">权限管理</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="audit">访问日志</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="contracts">合作协议</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 内容区域 -->
+                <div class="space-y-6">
+                    <!-- 合作伙伴面板 -->
+                    <div id="partners-panel" class="content-panel">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- 合作伙伴卡片1 -->
+                            <div class="bg-white rounded-xl card-shadow p-6 partner-card">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-industry text-blue-600 text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800">华为技术有限公司</h3>
+                                            <p class="text-sm text-gray-500">科技制造</p>
+                                        </div>
+                                    </div>
+                                    <span class="status-active text-white px-2 py-1 rounded-full text-xs font-medium">活跃</span>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">访问权限:</span>
+                                        <span class="font-medium">生产数据只读</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">共享表数:</span>
+                                        <span class="font-medium">12</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">合作期限:</span>
+                                        <span class="font-medium">2024-12-31</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                                    <button class="text-primary hover:text-primary-dark text-sm" onclick="viewPartnerDetail('huawei')">详情</button>
+                                    <button class="text-gray-600 hover:text-gray-800 text-sm">配置</button>
+                                </div>
+                            </div>
+
+                            <!-- 合作伙伴卡片2 -->
+                            <div class="bg-white rounded-xl card-shadow p-6 partner-card">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-leaf text-green-600 text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800">阿里巴巴集团</h3>
+                                            <p class="text-sm text-gray-500">电商平台</p>
+                                        </div>
+                                    </div>
+                                    <span class="status-active text-white px-2 py-1 rounded-full text-xs font-medium">活跃</span>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">访问权限:</span>
+                                        <span class="font-medium">API接口访问</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">共享表数:</span>
+                                        <span class="font-medium">8</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">合作期限:</span>
+                                        <span class="font-medium">2025-06-30</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                                    <button class="text-primary hover:text-primary-dark text-sm" onclick="viewPartnerDetail('alibaba')">详情</button>
+                                    <button class="text-gray-600 hover:text-gray-800 text-sm">配置</button>
+                                </div>
+                            </div>
+
+                            <!-- 合作伙伴卡片3 -->
+                            <div class="bg-white rounded-xl card-shadow p-6 partner-card">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-car text-yellow-600 text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800">比亚迪股份</h3>
+                                            <p class="text-sm text-gray-500">新能源汽车</p>
+                                        </div>
+                                    </div>
+                                    <span class="status-pending text-white px-2 py-1 rounded-full text-xs font-medium">待审核</span>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">访问权限:</span>
+                                        <span class="font-medium">申请中</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">申请表数:</span>
+                                        <span class="font-medium">5</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">申请时间:</span>
+                                        <span class="font-medium">2024-12-15</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                                    <button class="text-primary hover:text-primary-dark text-sm" onclick="viewPartnerDetail('byd')">详情</button>
+                                    <button class="text-orange-600 hover:text-orange-800 text-sm">审核</button>
+                                </div>
+                            </div>
+
+                            <!-- 更多合作伙伴... -->
+                            <div class="bg-white rounded-xl card-shadow p-6 partner-card">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-mobile-alt text-purple-600 text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800">小米科技</h3>
+                                            <p class="text-sm text-gray-500">智能设备</p>
+                                        </div>
+                                    </div>
+                                    <span class="status-active text-white px-2 py-1 rounded-full text-xs font-medium">活跃</span>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">访问权限:</span>
+                                        <span class="font-medium">数据同步</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">共享表数:</span>
+                                        <span class="font-medium">15</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">合作期限:</span>
+                                        <span class="font-medium">2025-03-31</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                                    <button class="text-primary hover:text-primary-dark text-sm" onclick="viewPartnerDetail('xiaomi')">详情</button>
+                                    <button class="text-gray-600 hover:text-gray-800 text-sm">配置</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 权限管理面板 -->
+                    <div id="permissions-panel" class="content-panel hidden">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-6">数据访问权限配置</h3>
+                            
+                            <!-- 权限表格 -->
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50">
+                                        <tr class="text-left text-sm text-gray-600">
+                                            <th class="px-4 py-3 font-medium">合作伙伴</th>
+                                            <th class="px-4 py-3 font-medium">数据表</th>
+                                            <th class="px-4 py-3 font-medium">权限类型</th>
+                                            <th class="px-4 py-3 font-medium">访问方式</th>
+                                            <th class="px-4 py-3 font-medium">有效期</th>
+                                            <th class="px-4 py-3 font-medium">状态</th>
+                                            <th class="px-4 py-3 font-medium">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm font-medium">华为技术</td>
+                                            <td class="px-4 py-3 text-sm">ods_sales_order</td>
+                                            <td class="px-4 py-3 text-sm">只读</td>
+                                            <td class="px-4 py-3 text-sm">API接口</td>
+                                            <td class="px-4 py-3 text-sm">2024-12-31</td>
+                                            <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">正常</span></td>
+                                            <td class="px-4 py-3">
+                                                <button class="text-primary hover:text-primary-dark text-sm mr-2">编辑</button>
+                                                <button class="text-red-600 hover:text-red-800 text-sm">撤销</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm font-medium">阿里巴巴</td>
+                                            <td class="px-4 py-3 text-sm">dim_user_info</td>
+                                            <td class="px-4 py-3 text-sm">只读</td>
+                                            <td class="px-4 py-3 text-sm">数据导出</td>
+                                            <td class="px-4 py-3 text-sm">2025-06-30</td>
+                                            <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">正常</span></td>
+                                            <td class="px-4 py-3">
+                                                <button class="text-primary hover:text-primary-dark text-sm mr-2">编辑</button>
+                                                <button class="text-red-600 hover:text-red-800 text-sm">撤销</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm font-medium">小米科技</td>
+                                            <td class="px-4 py-3 text-sm">dws_product_sales</td>
+                                            <td class="px-4 py-3 text-sm">读写</td>
+                                            <td class="px-4 py-3 text-sm">数据同步</td>
+                                            <td class="px-4 py-3 text-sm">2025-03-31</td>
+                                            <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">正常</span></td>
+                                            <td class="px-4 py-3">
+                                                <button class="text-primary hover:text-primary-dark text-sm mr-2">编辑</button>
+                                                <button class="text-red-600 hover:text-red-800 text-sm">撤销</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 访问日志面板 -->
+                    <div id="audit-panel" class="content-panel hidden">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-6">数据访问日志</h3>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50">
+                                        <tr class="text-left text-sm text-gray-600">
+                                            <th class="px-4 py-3 font-medium">时间</th>
+                                            <th class="px-4 py-3 font-medium">合作伙伴</th>
+                                            <th class="px-4 py-3 font-medium">访问表</th>
+                                            <th class="px-4 py-3 font-medium">操作类型</th>
+                                            <th class="px-4 py-3 font-medium">记录数</th>
+                                            <th class="px-4 py-3 font-medium">IP地址</th>
+                                            <th class="px-4 py-3 font-medium">状态</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">2024-12-17 14:35:22</td>
+                                            <td class="px-4 py-3 text-sm">华为技术</td>
+                                            <td class="px-4 py-3 text-sm">ods_sales_order</td>
+                                            <td class="px-4 py-3 text-sm">数据查询</td>
+                                            <td class="px-4 py-3 text-sm">1,256</td>
+                                            <td class="px-4 py-3 text-sm">192.168.1.100</td>
+                                            <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">成功</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">2024-12-17 13:22:15</td>
+                                            <td class="px-4 py-3 text-sm">阿里巴巴</td>
+                                            <td class="px-4 py-3 text-sm">dim_user_info</td>
+                                            <td class="px-4 py-3 text-sm">数据导出</td>
+                                            <td class="px-4 py-3 text-sm">850</td>
+                                            <td class="px-4 py-3 text-sm">172.16.0.55</td>
+                                            <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">成功</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">2024-12-17 11:45:33</td>
+                                            <td class="px-4 py-3 text-sm">小米科技</td>
+                                            <td class="px-4 py-3 text-sm">dws_product_sales</td>
+                                            <td class="px-4 py-3 text-sm">数据同步</td>
+                                            <td class="px-4 py-3 text-sm">2,134</td>
+                                            <td class="px-4 py-3 text-sm">10.0.1.200</td>
+                                            <td class="px-4 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">成功</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">2024-12-17 10:18:45</td>
+                                            <td class="px-4 py-3 text-sm">比亚迪股份</td>
+                                            <td class="px-4 py-3 text-sm">ods_sales_order</td>
+                                            <td class="px-4 py-3 text-sm">数据查询</td>
+                                            <td class="px-4 py-3 text-sm">0</td>
+                                            <td class="px-4 py-3 text-sm">203.114.5.88</td>
+                                            <td class="px-4 py-3"><span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">权限拒绝</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 合作协议面板 -->
+                    <div id="contracts-panel" class="content-panel hidden">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-6">合作协议管理</h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="font-medium text-gray-800">数据共享协议 - 华为技术</h4>
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">有效</span>
+                                    </div>
+                                    <div class="space-y-2 text-sm text-gray-600">
+                                        <div>签署日期: 2024-01-15</div>
+                                        <div>有效期: 2024-01-15 ~ 2024-12-31</div>
+                                        <div>数据范围: 生产订单数据</div>
+                                    </div>
+                                    <div class="flex space-x-2 mt-4">
+                                        <button class="text-primary hover:text-primary-dark text-sm">查看</button>
+                                        <button class="text-gray-600 hover:text-gray-800 text-sm">下载</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="font-medium text-gray-800">API访问协议 - 阿里巴巴</h4>
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">有效</span>
+                                    </div>
+                                    <div class="space-y-2 text-sm text-gray-600">
+                                        <div>签署日期: 2024-06-20</div>
+                                        <div>有效期: 2024-06-20 ~ 2025-06-30</div>
+                                        <div>数据范围: 用户信息数据</div>
+                                    </div>
+                                    <div class="flex space-x-2 mt-4">
+                                        <button class="text-primary hover:text-primary-dark text-sm">查看</button>
+                                        <button class="text-gray-600 hover:text-gray-800 text-sm">下载</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加合作伙伴模态框 -->
+    <div id="partnerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl max-w-md w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">添加合作伙伴</h3>
+                    <button onclick="closePartnerModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">企业名称</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">行业类别</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option>选择行业</option>
+                                <option>科技制造</option>
+                                <option>电商平台</option>
+                                <option>金融服务</option>
+                                <option>汽车制造</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">联系邮箱</label>
+                            <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">合作类型</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option>数据共享</option>
+                                <option>API访问</option>
+                                <option>数据同步</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3 mt-6">
+                        <button type="button" onclick="closePartnerModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">取消</button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">添加</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+            const toggleBtn = document.getElementById('sidebarToggleBtn');
+            
+            if (sidebar.classList.contains('sidebar-expanded')) {
+                sidebar.classList.remove('sidebar-expanded');
+                sidebar.classList.add('sidebar-collapsed');
+                mainContent.classList.remove('ml-60');
+                mainContent.classList.add('ml-20');
+                sidebarTexts.forEach(text => text.style.display = 'none');
+                toggleBtn.querySelector('i').classList.remove('fa-bars');
+                toggleBtn.querySelector('i').classList.add('fa-indent');
+            } else {
+                sidebar.classList.remove('sidebar-collapsed');
+                sidebar.classList.add('sidebar-expanded');
+                mainContent.classList.remove('ml-20');
+                mainContent.classList.add('ml-60');
+                sidebarTexts.forEach(text => text.style.display = 'inline');
+                toggleBtn.querySelector('i').classList.remove('fa-indent');
+                toggleBtn.querySelector('i').classList.add('fa-bars');
+            }
+        }
+
+        // 标签切换功能
+        function initTabSwitching() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const contentPanels = document.querySelectorAll('.content-panel');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetPanel = this.dataset.tab + '-panel';
+                    
+                    // 重置所有标签状态
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active', 'text-primary', 'border-b-2', 'border-primary', 'bg-gradient-to-b', 'from-blue-50', 'to-white');
+                        btn.classList.add('text-gray-600');
+                    });
+                    
+                    // 激活当前标签
+                    this.classList.add('tab-active');
+                    this.classList.remove('text-gray-600');
+                    
+                    // 隐藏所有面板
+                    contentPanels.forEach(panel => {
+                        panel.classList.add('hidden');
+                    });
+                    
+                    // 显示目标面板
+                    const panel = document.getElementById(targetPanel);
+                    if (panel) {
+                        panel.classList.remove('hidden');
+                    }
+                });
+            });
+        }
+
+        // 模态框控制
+        function openPartnerModal() {
+            document.getElementById('partnerModal').classList.remove('hidden');
+        }
+
+        function closePartnerModal() {
+            document.getElementById('partnerModal').classList.add('hidden');
+        }
+
+        // 查看合作伙伴详情
+        function viewPartnerDetail(partnerId) {
+            alert('跳转到合作伙伴详情页: ' + partnerId);
+            // 这里可以跳转到具体的详情页面
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTabSwitching();
+        });
+    </script>
+</body>
+</html>

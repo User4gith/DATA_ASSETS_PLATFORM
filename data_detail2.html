@@ -38,6 +38,71 @@
             margin: 0 8px;
             color: #d0d7de;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        /* 添加模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -87,27 +152,53 @@
 
     <div class="flex pt-16">
         <!-- 左侧菜单栏 -->
-        <aside id="sidebar" class="sidebar-expanded bg-white border-r border-gray-200 fixed left-0 top-16 bottom-0 z-40 transition-all duration-300">
-            <nav class="p-4 space-y-2">
-                <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-                    <i class="fas fa-tachometer-alt w-5"></i>
-                    <span class="sidebar-text">首页仪表盘</span>
+        <!-- 左侧菜单栏 -->
+        <aside id="sidebar" class="fixed left-0 top-16 h-full bg-white shadow-lg transition-all duration-300 sidebar-expanded z-20">
+            <nav class="mt-4">
+                <!-- 主要功能 -->
+                <div class="px-4 py-2">
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-text">主要功能</div>
+                </div>
+                
+                <a href="index.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-home w-5"></i>
+                    <span class="sidebar-text">首页概览</span>
                 </a>
-                <a href="data_map.html" class="flex items-center space-x-3 px-3 py-2 bg-primary text-white rounded-lg">
+                
+                <a href="data_map.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                     <i class="fas fa-database w-5"></i>
                     <span class="sidebar-text">数据资产中心</span>
                 </a>
-                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+        
+                <!-- 数据合作 -->
+                <div class="px-4 py-2 mt-4">
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-text">数据合作</div>
+                </div>
+                
+                <a href="data_map_coop.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-share-alt w-5"></i>
+                    <span class="sidebar-text">开放数据资产</span>
+                </a>
+
+                <a href="data_comp_mg4.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-handshake w-5"></i>
+                    <span class="sidebar-text">合作企业管理</span>
+                </a>
+        
+                <!-- 其他功能 -->
+                <!-- <a href="#" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
                     <i class="fas fa-chart-bar w-5"></i>
                     <span class="sidebar-text">统计与报表</span>
                     <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
                 </a>
-                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+                
+                <a href="#" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
                     <i class="fas fa-exclamation-triangle w-5"></i>
                     <span class="sidebar-text">监控与告警</span>
                     <span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded sidebar-text">预留</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                </a> -->
+                
+                <a href="system.html" class="flex items-center space-x-3 px-3 py-2 mx-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                     <i class="fas fa-cog w-5"></i>
                     <span class="sidebar-text">系统管理</span>
                 </a>
@@ -144,7 +235,7 @@
                                     <i class="fas fa-star text-gray-300 cursor-pointer hover:text-yellow-500"></i>
                                 </div>
                                 
-                                <div class="flex items-center space-x-6 text-sm text-gray-600">
+                                <!-- <div class="flex items-center space-x-6 text-sm text-gray-600">
                                     <div class="flex items-center space-x-2">
                                         <span class="font-medium">技术负责人:</span>
                                         <span>zhang.san@company.com</span>
@@ -153,7 +244,26 @@
                                         <span class="font-medium">业务负责人:</span>
                                         <span>李四</span>
                                     </div>
+                                </div> -->
+                            
+                                <div class="flex items-center space-x-6 text-sm text-gray-600">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-medium">技术负责人:</span>
+                                        <button onclick="showOwnerInfo('zhangsan')" 
+                                                class="text-primary hover:text-blue-600 hover:underline cursor-pointer">
+                                            zhang.san@company.com
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-medium">业务负责人:</span>
+                                        <button onclick="showOwnerInfo('lisi')" 
+                                                class="text-primary hover:text-blue-600 hover:underline cursor-pointer">
+                                            李四
+                                        </button>
+                                    </div>
                                 </div>
+ 
+
                             </div>
                         </div>
                         
@@ -179,6 +289,7 @@
                             <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="fields">字段结构</button>
                             <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="preview">数据预览</button>
                             <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="ddl">建表语句</button>
+                            <button class="tab-button px-4 py-3 text-gray-600 hover:text-primary" data-tab="coreAsset">核心认定</button>
                         </div>
                     </div>
                 </div>
@@ -337,127 +448,79 @@
                                     <button class="px-3 py-1 bg-primary text-white text-sm rounded hover:bg-primary-dark">刷新数据</button>
                                 </div>
                             </div>
-
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-sm">
-                                    <thead class="bg-gray-50">
-                                        <tr class="text-left text-gray-600">
-                                            <th class="px-3 py-3 font-medium">order_id</th>
-                                            <th class="px-3 py-3 font-medium">customer_id</th>
-                                            <th class="px-3 py-3 font-medium">product_name</th>
-                                            <th class="px-3 py-3 font-medium">order_amount</th>
-                                            <th class="px-3 py-3 font-medium">order_date</th>
-                                            <th class="px-3 py-3 font-medium">status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-200">
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-3 py-3">ORD20241201001</td>
-                                            <td class="px-3 py-3">CUST001</td>
-                                            <td class="px-3 py-3">智能手机X1</td>
-                                            <td class="px-3 py-3 text-right">3299.00</td>
-                                            <td class="px-3 py-3">2024-12-01</td>
-                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">已完成</span></td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-3 py-3">ORD20241201002</td>
-                                            <td class="px-3 py-3">CUST002</td>
-                                            <td class="px-3 py-3">笔记本电脑Pro</td>
-                                            <td class="px-3 py-3 text-right">8999.00</td>
-                                            <td class="px-3 py-3">2024-12-01</td>
-                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">处理中</span></td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-3 py-3">ORD20241202003</td>
-                                            <td class="px-3 py-3">CUST003</td>
-                                            <td class="px-3 py-3">无线耳机</td>
-                                            <td class="px-3 py-3 text-right">299.00</td>
-                                            <td class="px-3 py-3">2024-12-02</td>
-                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">已完成</span></td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-3 py-3">ORD20241202004</td>
-                                            <td class="px-3 py-3">CUST004</td>
-                                            <td class="px-3 py-3">智能手表</td>
-                                            <td class="px-3 py-3 text-right">1999.00</td>
-                                            <td class="px-3 py-3">2024-12-02</td>
-                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">已发货</span></td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-3 py-3">ORD20241203005</td>
-                                            <td class="px-3 py-3">CUST005</td>
-                                            <td class="px-3 py-3">平板电脑</td>
-                                            <td class="px-3 py-3 text-right">2599.00</td>
-                                            <td class="px-3 py-3">2024-12-03</td>
-                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">已完成</span></td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-3 py-3">ORD20241203006</td>
-                                            <td class="px-3 py-3">CUST006</td>
-                                            <td class="px-3 py-3">游戏手柄</td>
-                                            <td class="px-3 py-3 text-right">199.00</td>
-                                            <td class="px-3 py-3">2024-12-03</td>
-                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">已取消</span></td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-3 py-3">ORD20241204007</td>
-                                            <td class="px-3 py-3">CUST007</td>
-                                            <td class="px-3 py-3">显示器27寸</td>
-                                            <td class="px-3 py-3 text-right">1299.00</td>
-                                            <td class="px-3 py-3">2024-12-04</td>
-                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">处理中</span></td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-3 py-3">ORD20241204008</td>
-                                            <td class="px-3 py-3">CUST008</td>
-                                            <td class="px-3 py-3">键盘机械版</td>
-                                            <td class="px-3 py-3 text-right">399.00</td>
-                                            <td class="px-3 py-3">2024-12-04</td>
-                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">已完成</span></td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-3 py-3">ORD20241205009</td>
-                                            <td class="px-3 py-3">CUST009</td>
-                                            <td class="px-3 py-3">鼠标无线版</td>
-                                            <td class="px-3 py-3 text-right">99.00</td>
-                                            <td class="px-3 py-3">2024-12-05</td>
-                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">已发货</span></td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-3 py-3">ORD20241205010</td>
-                                            <td class="px-3 py-3">CUST010</td>
-                                            <td class="px-3 py-3">充电器快充版</td>
-                                            <td class="px-3 py-3 text-right">59.00</td>
-                                            <td class="px-3 py-3">2024-12-05</td>
-                                            <td class="px-3 py-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">已完成</span></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- 数据统计 -->
-                            <!-- <div class="mt-6 pt-6 border-t border-gray-200">
-                                <div class="grid grid-cols-4 gap-4">
-                                    <div class="text-center">
-                                        <div class="text-2xl font-bold text-gray-800">10</div>
-                                        <div class="text-sm text-gray-500">预览记录数</div>
+                            
+                            <!-- 权限检查和申请区域 -->
+                            <div id="permissionCheck">
+                                <!-- 无权限时显示申请界面 -->
+                                <div id="noPermissionArea" class="text-center py-12">
+                                    <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-lock text-yellow-600 text-2xl"></i>
                                     </div>
-                                    <div class="text-center">
-                                        <div class="text-2xl font-bold text-primary">18,590.00</div>
-                                        <div class="text-sm text-gray-500">订单总金额</div>
-                                    </div>
-                                    <div class="text-center">
-                                        <div class="text-2xl font-bold text-success">7</div>
-                                        <div class="text-sm text-gray-500">已完成订单</div>
-                                    </div>
-                                    <div class="text-center">
-                                        <div class="text-2xl font-bold text-warning">2</div>
-                                        <div class="text-sm text-gray-500">处理中订单</div>
+                                    <h4 class="text-lg font-medium text-gray-900 mb-2">您暂无数据查看权限</h4>
+                                    <p class="text-sm text-gray-500 mb-6">需要申请查看权限才能预览数据内容</p>
+                                    
+                                    <div class="max-w-md mx-auto">
+                                        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                                            <div class="flex items-center justify-between text-sm">
+                                                <span class="text-gray-600">数据表:</span>
+                                                <span class="font-medium text-gray-900">ods_sales_order</span>
+                                            </div>
+                                            <div class="flex items-center justify-between text-sm mt-2">
+                                                <span class="text-gray-600">申请权限:</span>
+                                                <span class="text-blue-600 font-medium">数据查看</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <button onclick="showApplyPermissionModal()" 
+                                                class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                                            <i class="fas fa-key mr-2"></i>申请查看权限
+                                        </button>
                                     </div>
                                 </div>
-                            </div> -->
+                                
+                                <!-- 有权限时显示数据表格 -->
+                                <div id="hasPermissionArea" class="hidden">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-sm">
+                                            <thead class="bg-gray-50">
+                                                <tr class="text-left text-gray-600">
+                                                    <th class="px-3 py-3 font-medium">order_id</th>
+                                                    <th class="px-3 py-3 font-medium">customer_id</th>
+                                                    <th class="px-3 py-3 font-medium">product_name</th>
+                                                    <th class="px-3 py-3 font-medium">order_amount</th>
+                                                    <th class="px-3 py-3 font-medium">order_date</th>
+                                                    <th class="px-3 py-3 font-medium">status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-200">
+                                                <tr class="hover:bg-gray-50">
+                                                    <td class="px-3 py-3">ORD20241201001</td>
+                                                    <td class="px-3 py-3">CUST001</td>
+                                                    <td class="px-3 py-3">智能手机</td>
+                                                    <td class="px-3 py-3">¥3,299.00</td>
+                                                    <td class="px-3 py-3">2024-12-01</td>
+                                                    <td class="px-3 py-3">
+                                                        <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">已完成</span>
+                                                    </td>
+                                                </tr>
+                                                <tr class="hover:bg-gray-50">
+                                                    <td class="px-3 py-3">ORD20241201002</td>
+                                                    <td class="px-3 py-3">CUST002</td>
+                                                    <td class="px-3 py-3">平板电脑</td>
+                                                    <td class="px-3 py-3">¥2,599.00</td>
+                                                    <td class="px-3 py-3">2024-12-01</td>
+                                                    <td class="px-3 py-3">
+                                                        <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">处理中</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    
 
                     <!-- 建表语句面板 -->
                     <div id="ddl-panel" class="content-panel hidden">
@@ -471,22 +534,106 @@
 
                             <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
                                 <pre class="text-sm text-gray-300" id="ddl-content"><code>CREATE EXTERNAL TABLE `mammut_user.ods_sales_order` (
-  `order_id` string COMMENT '订单编号',
-  `customer_id` string COMMENT '客户编号', 
-  `product_name` string COMMENT '产品名称',
-  `order_amount` decimal(10,2) COMMENT '订单金额',
-  `order_date` date COMMENT '订单日期',
-  `status` string COMMENT '订单状态')
-PARTITIONED BY ( 
-  `pt` string COMMENT '分区日期')
-STORED AS PARQUET
-LOCATION
-  'hdfs://cluster/user/hive/warehouse/mammut_user.db/ods_sales_order'
-TBLPROPERTIES (
-  'transient_lastDdlTime'='1703567823');</code></pre>
+                                `order_id` string COMMENT '订单编号',
+                                `customer_id` string COMMENT '客户编号', 
+                                `product_name` string COMMENT '产品名称',
+                                `order_amount` decimal(10,2) COMMENT '订单金额',
+                                `order_date` date COMMENT '订单日期',
+                                `status` string COMMENT '订单状态')
+                                PARTITIONED BY ( 
+                                `pt` string COMMENT '分区日期')
+                                STORED AS PARQUET
+                                LOCATION
+                                'hdfs://cluster/user/hive/warehouse/mammut_user.db/ods_sales_order'
+                                TBLPROPERTIES (
+                                'transient_lastDdlTime'='1703567823');</code></pre>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 核心资产认定面板 -->
+                    <div id="coreAsset-panel" class="content-panel hidden">
+                        <div class="space-y-6">
+                            <!-- 当前认定状态卡片 -->
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold text-gray-800">核心资产认定</h3>
+                                    <button onclick="showCoreAssetModal()" 
+                                            class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors">
+                                        <i class="fas fa-edit mr-2"></i>设置认定
+                                    </button>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <!-- 认定状态 -->
+                                    <div class="space-y-4">
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-sm font-medium text-gray-700">认定状态:</span>
+                                            <span id="currentStatus" class="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded-full">
+                                                未认定
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm text-gray-600">认定时间:</span>
+                                                <span id="statusDate" class="text-sm text-gray-900">-</span>
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm text-gray-600">认定人:</span>
+                                                <span id="statusOwner" class="text-sm text-gray-900">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 认定理由 -->
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-700 mb-2">认定理由</h4>
+                                        <div class="bg-gray-50 rounded-lg p-4 min-h-24">
+                                            <p id="statusReason" class="text-sm text-gray-600">
+                                                暂无认定理由
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 认定说明卡片 -->
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-4">认定标准</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <div class="flex items-center space-x-2 mb-3">
+                                            <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                                <i class="fas fa-star mr-1"></i>核心
+                                            </span>
+                                            <span class="text-sm font-medium text-gray-900">核心数据资产</span>
+                                        </div>
+                                        <ul class="text-sm text-gray-600 space-y-1">
+                                            <li>• 业务核心流程必需</li>
+                                            <li>• 高频访问使用</li>
+                                            <li>• 影响关键决策</li>
+                                            <li>• 多系统依赖</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center space-x-2 mb-3">
+                                            <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">普通</span>
+                                            <span class="text-sm font-medium text-gray-900">普通数据资产</span>
+                                        </div>
+                                        <ul class="text-sm text-gray-600 space-y-1">
+                                            <li>• 辅助业务功能</li>
+                                            <li>• 访问频率一般</li>
+                                            <li>• 影响范围有限</li>
+                                            <li>• 可替代性较强</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
         </main>
@@ -569,10 +716,573 @@ TBLPROPERTIES (
             });
         }
 
+        // 负责人数据
+        const ownerInfoData = {
+            'zhangsan': {
+                name: '张三',
+                department: '技术部',
+                role: '高级数据工程师',
+                email: 'zhang.san@company.com',
+                phone: '138-0013-8001'
+            },
+            'lisi': {
+                name: '李四',
+                department: '业务部',
+                role: '业务分析师',
+                email: 'lisi@company.com',
+                phone: '138-0013-8002'
+            }
+        };
+
+        // 显示负责人信息
+        function showOwnerInfo(ownerId) {
+            const owner = ownerInfoData[ownerId];
+            if (!owner) {
+                alert('未找到负责人信息');
+                return;
+            }
+            
+            // 填充信息
+            document.getElementById('ownerInfoName').textContent = owner.name;
+            document.getElementById('ownerInfoDepartment').textContent = owner.department;
+            document.getElementById('ownerInfoEmail').textContent = owner.email;
+            document.getElementById('ownerInfoPhone').textContent = owner.phone;
+            
+            // 角色样式
+            const roleElement = document.getElementById('ownerInfoRole');
+            roleElement.textContent = owner.role;
+            
+            if (owner.role.includes('工程师')) {
+                roleElement.className = 'px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full';
+            } else if (owner.role.includes('分析师')) {
+                roleElement.className = 'px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full';
+            } else {
+                roleElement.className = 'px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full';
+            }
+            
+            // 显示模态框
+            document.getElementById('ownerInfoModal').classList.add('show');
+            document.body.classList.add('modal-open');
+        }
+
+        // 隐藏负责人信息
+        function hideOwnerInfo() {
+            document.getElementById('ownerInfoModal').classList.remove('show');
+            document.body.classList.remove('modal-open');
+        }
+
+        // 点击外部关闭模态框
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'ownerInfoModal') {
+                hideOwnerInfo();
+            }
+        });
+
+        // ESC键关闭模态框
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('ownerInfoModal').classList.contains('show')) {
+                hideOwnerInfo();
+            }
+        });
+
+        // 用户权限状态（模拟）
+        let userPermissions = {
+            hasViewPermission: false, // 初始无查看权限
+            hasDownloadPermission: false,
+            hasEditPermission: false
+        };
+
+        // 页面加载时检查权限
+        document.addEventListener('DOMContentLoaded', function() {
+            checkDataPermission();
+        });
+
+        // 检查数据权限
+        function checkDataPermission() {
+            const noPermissionArea = document.getElementById('noPermissionArea');
+            const hasPermissionArea = document.getElementById('hasPermissionArea');
+            
+            if (userPermissions.hasViewPermission) {
+                noPermissionArea.classList.add('hidden');
+                hasPermissionArea.classList.remove('hidden');
+            } else {
+                noPermissionArea.classList.remove('hidden');
+                hasPermissionArea.classList.add('hidden');
+            }
+        }
+
+        // 显示申请权限模态框
+        function showApplyPermissionModal() {
+            document.getElementById('applyPermissionModal').classList.add('show');
+            document.body.classList.add('modal-open');
+        }
+
+        // 隐藏申请权限模态框
+        function hideApplyPermissionModal() {
+            document.getElementById('applyPermissionModal').classList.remove('show');
+            document.body.classList.remove('modal-open');
+            document.getElementById('permissionForm').reset();
+        }
+
+        // 提交权限申请
+        function submitPermissionApplication() {
+            const reason = document.getElementById('applyReason').value.trim();
+            
+            if (!reason) {
+                alert('请填写申请理由');
+                return;
+            }
+            
+            hideApplyPermissionModal();
+            showApplicationStatus('success', '申请已提交', '您的权限申请已成功提交，预计在 2-4 小时内处理完成，请耐心等待。');
+            
+            // 模拟3秒后申请通过
+            setTimeout(() => {
+                userPermissions.hasViewPermission = true;
+                checkDataPermission();
+                showApplicationStatus('approved', '申请已通过', '您的数据查看权限已获得批准，现在可以查看数据内容了。');
+            }, 3000);
+        }
+
+        // 显示申请状态
+        function showApplicationStatus(type, title, message) {
+            const modal = document.getElementById('applicationStatusModal');
+            const icon = document.getElementById('statusIcon');
+            const titleEl = document.getElementById('statusTitle');
+            const messageEl = document.getElementById('statusMessage');
+            
+            if (type === 'success') {
+                icon.className = 'w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4';
+                icon.innerHTML = '<i class="fas fa-check text-green-600 text-xl"></i>';
+            } else if (type === 'approved') {
+                icon.className = 'w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4';
+                icon.innerHTML = '<i class="fas fa-key text-blue-600 text-xl"></i>';
+            }
+            
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            
+            modal.classList.add('show');
+            document.body.classList.add('modal-open');
+        }
+
+        // 隐藏申请状态模态框
+        function hideApplicationStatusModal() {
+            document.getElementById('applicationStatusModal').classList.remove('show');
+            document.body.classList.remove('modal-open');
+        }
+
+
+        // 核心资产数据
+        let coreAssetData = {
+            status: null, // 'core' 或 'normal' 或 null
+            reason: '',
+            date: '',
+            owner: ''
+        };
+
+        // 修改现有的标签切换函数，添加对coreAsset的支持
+        function switchTab(tabName) {
+            // 隐藏所有面板
+            document.querySelectorAll('.content-panel').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            
+            // 重置所有标签样式
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.className = 'tab-button px-4 py-3 text-gray-600 hover:text-primary';
+            });
+            
+            // 显示选中的面板
+            const targetPanel = document.getElementById(tabName + '-panel');
+            if (targetPanel) {
+                targetPanel.classList.remove('hidden');
+            }
+            
+            // 激活选中的标签
+            const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
+            if (activeButton) {
+                activeButton.className = 'tab-button px-4 py-3 text-primary font-medium border-b-2 border-primary bg-gradient-to-b from-blue-50 to-white';
+            }
+            
+            // 如果切换到核心资产认定，加载数据
+            if (tabName === 'coreAsset') {
+                loadCoreAssetData();
+            }
+        }
+
+        // 加载核心资产数据
+        function loadCoreAssetData() {
+            const tableId = 'ods_sales_order'; // 当前表ID
+            const coreAssets = JSON.parse(localStorage.getItem('coreAssets') || '{}');
+            
+            if (coreAssets[tableId]) {
+                coreAssetData = coreAssets[tableId];
+                updateCoreAssetDisplay();
+            }
+        }
+
+        // 显示核心资产认定模态框
+        function showCoreAssetModal() {
+            // 如果已有认定，预填充数据
+            if (coreAssetData.status) {
+                const radio = document.querySelector(`input[name="coreStatus"][value="${coreAssetData.status}"]`);
+                if (radio) radio.checked = true;
+                document.getElementById('coreReason').value = coreAssetData.reason;
+            }
+            
+            document.getElementById('coreAssetModal').classList.add('show');
+            document.body.classList.add('modal-open');
+        }
+
+        // 隐藏核心资产认定模态框
+        function hideCoreAssetModal() {
+            document.getElementById('coreAssetModal').classList.remove('show');
+            document.body.classList.remove('modal-open');
+            // 清空表单
+            document.querySelectorAll('input[name="coreStatus"]').forEach(radio => radio.checked = false);
+            document.getElementById('coreReason').value = '';
+        }
+
+        // 提交核心资产认定
+        function submitCoreAsset() {
+            const selectedStatus = document.querySelector('input[name="coreStatus"]:checked')?.value;
+            const reason = document.getElementById('coreReason').value.trim();
+
+            if (!selectedStatus) {
+                alert('请选择认定结果');
+                return;
+            }
+
+            if (!reason) {
+                alert('请填写认定理由');
+                return;
+            }
+
+            // 更新数据
+            coreAssetData = {
+                status: selectedStatus,
+                reason: reason,
+                date: new Date().toLocaleString('zh-CN'),
+                owner: '当前用户' // 实际中从登录信息获取
+            };
+
+            // 更新显示
+            updateCoreAssetDisplay();
+            
+            // 隐藏模态框
+            hideCoreAssetModal();
+            
+            // 显示成功提示
+            showToast('核心资产认定已保存');
+            
+            // 同步到data_map.html
+            syncToDataMap();
+        }
+
+        // 更新核心资产显示
+        function updateCoreAssetDisplay() {
+            const currentStatus = document.getElementById('currentStatus');
+            const statusDate = document.getElementById('statusDate');
+            const statusOwner = document.getElementById('statusOwner');
+            const statusReason = document.getElementById('statusReason');
+
+            if (coreAssetData.status === 'core') {
+                currentStatus.className = 'px-3 py-1 text-sm bg-yellow-100 text-yellow-800 rounded-full';
+                currentStatus.innerHTML = '<i class="fas fa-star mr-1"></i>核心资产';
+            } else if (coreAssetData.status === 'normal') {
+                currentStatus.className = 'px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded-full';
+                currentStatus.textContent = '普通资产';
+            } else {
+                currentStatus.className = 'px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded-full';
+                currentStatus.textContent = '未认定';
+            }
+
+            statusDate.textContent = coreAssetData.date || '-';
+            statusOwner.textContent = coreAssetData.owner || '-';
+            statusReason.textContent = coreAssetData.reason || '暂无认定理由';
+        }
+
+        // 同步到数据地图
+        function syncToDataMap() {
+            const tableId = 'ods_sales_order'; // 当前表ID
+            const coreAssets = JSON.parse(localStorage.getItem('coreAssets') || '{}');
+            
+            if (coreAssetData.status === 'core') {
+                coreAssets[tableId] = {
+                    status: 'core',
+                    reason: coreAssetData.reason,
+                    date: coreAssetData.date,
+                    owner: coreAssetData.owner
+                };
+            } else {
+                // 如果不是核心资产，从核心资产列表中移除
+                delete coreAssets[tableId];
+            }
+            
+            localStorage.setItem('coreAssets', JSON.stringify(coreAssets));
+            console.log('已同步核心资产状态到数据地图');
+        }
+
+        // 简单的提示消息
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            toast.innerHTML = `<i class="fas fa-check mr-2"></i>${message}`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 3000);
+        }
+
+        // 页面加载时绑定标签点击事件
+        document.addEventListener('DOMContentLoaded', function() {
+            // 绑定标签按钮事件（如果还没有绑定）
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    switchTab(tabName);
+                });
+            });
+            
+            // 加载核心资产数据
+            loadCoreAssetData();
+        });
+
+        // 模态框事件处理
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'coreAssetModal') {
+                hideCoreAssetModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('coreAssetModal').classList.contains('show')) {
+                hideCoreAssetModal();
+            }
+        });
+
         // 页面初始化
         document.addEventListener('DOMContentLoaded', function() {
             initTabSwitching();
         });
     </script>
+
+    <div id="ownerInfoModal" class="modal">
+        <div class="bg-white rounded-lg w-full max-w-sm mx-4 shadow-xl">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">负责人信息</h3>
+                    <button onclick="hideOwnerInfo()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-user text-blue-600 text-xl"></i>
+                    </div>
+                    <h4 id="ownerInfoName" class="text-lg font-medium text-gray-900">-</h4>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">部门:</span>
+                        <span id="ownerInfoDepartment" class="text-sm text-gray-900">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">角色:</span>
+                        <span id="ownerInfoRole" class="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">邮箱:</span>
+                        <span id="ownerInfoEmail" class="text-sm text-gray-600">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">电话:</span>
+                        <span id="ownerInfoPhone" class="text-sm text-gray-600">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6 border-t border-gray-200 flex justify-end">
+                <button onclick="hideOwnerInfo()" 
+                        class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 申请权限模态框 -->
+    <div id="applyPermissionModal" class="modal">
+        <div class="bg-white rounded-lg w-full max-w-md mx-4 shadow-xl">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">申请数据查看权限</h3>
+                    <button onclick="hideApplyPermissionModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <form id="permissionForm">
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-table text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-900">ods_sales_order</h4>
+                                    <p class="text-sm text-gray-500">销售订单原始数据表</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">申请权限类型</label>
+                            <select id="permissionType" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <option value="view">数据查看</option>
+                                <option value="download">数据下载</option>
+                                <option value="edit">数据编辑</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">申请理由 <span class="text-red-500">*</span></label>
+                            <textarea id="applyReason" 
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
+                                    rows="3" 
+                                    placeholder="请说明申请此数据权限的业务用途..."
+                                    required></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">使用期限</label>
+                            <select id="usagePeriod" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <option value="7">7天</option>
+                                <option value="30" selected>30天</option>
+                                <option value="90">90天</option>
+                                <option value="permanent">永久</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3">
+                <button onclick="hideApplyPermissionModal()" 
+                        class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                    取消
+                </button>
+                <button onclick="submitPermissionApplication()" 
+                        class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    <i class="fas fa-paper-plane mr-2"></i>提交申请
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 申请状态提示模态框 -->
+    <div id="applicationStatusModal" class="modal">
+        <div class="bg-white rounded-lg w-full max-w-sm mx-4 shadow-xl">
+            <div class="p-6 text-center">
+                <div id="statusIcon" class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-green-600 text-xl"></i>
+                </div>
+                <h3 id="statusTitle" class="text-lg font-medium text-gray-900 mb-2">申请已提交</h3>
+                <p id="statusMessage" class="text-sm text-gray-500 mb-6">
+                    您的权限申请已成功提交，预计在 2-4 小时内处理完成，请耐心等待。
+                </p>
+                <button onclick="hideApplicationStatusModal()" 
+                        class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+                    确定
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 核心资产认定模态框 -->
+    <div id="coreAssetModal" class="modal">
+        <div class="bg-white rounded-lg w-full max-w-lg mx-4 shadow-xl">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">核心资产认定</h3>
+                    <button onclick="hideCoreAssetModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="space-y-4">
+                    <!-- 表信息 -->
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-table text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900">ods_sales_order</h4>
+                                <p class="text-sm text-gray-500">销售订单原始数据表</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 认定选择 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">请选择认定结果</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="coreStatus" value="core" class="mr-3">
+                                <div class="flex items-center">
+                                    <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full mr-3">
+                                        <i class="fas fa-star mr-1"></i>核心
+                                    </span>
+                                    <span class="text-sm text-gray-700">核心数据资产</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="coreStatus" value="normal" class="mr-3">
+                                <div class="flex items-center">
+                                    <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full mr-3">普通</span>
+                                    <span class="text-sm text-gray-700">普通数据资产</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 认定理由 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">认定理由 <span class="text-red-500">*</span></label>
+                        <textarea id="coreReason" 
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
+                                rows="3" 
+                                placeholder="请简要说明认定理由..."
+                                required></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3">
+                <button onclick="hideCoreAssetModal()" 
+                        class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                    取消
+                </button>
+                <button onclick="submitCoreAsset()" 
+                        class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark">
+                    确认认定
+                </button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

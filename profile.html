@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 数智之眼</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        'primary-dark': '#2563eb',
+                        secondary: '#64748b',
+                        accent: '#06b6d4',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        error: '#ef4444'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        .profile-tab.active {
+            color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .profile-panel.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-30">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo区域 -->
+                <div class="flex items-center space-x-4">
+                    <button onclick="goBack()" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <i class="fas fa-arrow-left text-lg"></i>
+                    </button>
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-eye text-white text-sm"></i>
+                        </div>
+                        <span class="text-xl font-semibold text-gray-800">数智之眼</span>
+                    </div>
+                </div>
+
+                <!-- 右侧：用户信息 -->
+                <div class="flex items-center space-x-4">
+                    <!-- 通知 -->
+                    <div class="relative">
+                        <button class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg relative">
+                            <i class="fas fa-bell text-lg"></i>
+                            <span class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                        </button>
+                    </div>
+                    
+                    <!-- 用户头像和信息 -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-gray-600 text-sm"></i>
+                        </div>
+                        <div class="hidden md:block">
+                            <div class="text-sm font-medium text-gray-700">张三</div>
+                            <div class="text-xs text-gray-500">系统管理员</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <div class="pt-16 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- 个人信息头部 -->
+            <div class="bg-white rounded-xl card-shadow mb-8">
+                <div class="p-6">
+                    <div class="flex items-center space-x-6">
+                        <!-- 头像 -->
+                        <div class="relative">
+                            <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+                                <span class="text-white text-2xl font-bold">张</span>
+                            </div>
+                            <button class="absolute -bottom-1 -right-1 w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700">
+                                <i class="fas fa-camera text-white text-xs"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- 基本信息 -->
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-4 mb-2">
+                                <h1 class="text-2xl font-bold text-gray-900">张三</h1>
+                                <span class="px-3 py-1 bg-primary text-white text-sm rounded-full">系统管理员</span>
+
+                            </div>
+                            <div class="flex items-center space-x-6 text-sm text-gray-600">
+                                <span><i class="fas fa-building mr-2"></i>技术部</span>
+                                <span><i class="fas fa-envelope mr-2"></i>zhangsan@company.com</span>
+                                <span><i class="fas fa-phone mr-2"></i>186****8888</span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <!-- 功能标签导航 -->
+            <div class="bg-white rounded-xl card-shadow mb-6">
+                <div class="flex items-center px-6 pt-4 border-b border-gray-200">
+                    <div class="flex space-x-0">
+                        <button class="profile-tab px-4 py-3 text-primary font-medium border-b-2 border-primary bg-gradient-to-b from-blue-50 to-white" data-tab="workbench">我的工作台</button>
+                        <button class="profile-tab px-4 py-3 text-gray-600 hover:text-primary" data-tab="info">个人信息</button>
+                        <button class="profile-tab px-4 py-3 text-gray-600 hover:text-primary" data-tab="security">安全设置</button>
+                        <button class="profile-tab px-4 py-3 text-gray-600 hover:text-primary" data-tab="activity">活动记录</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 我的工作台面板 -->
+            <div id="workbench-panel" class="profile-panel">
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clipboard-check text-red-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-500">待我审批</div>
+                                <div class="text-2xl font-bold text-gray-900">2</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-tasks text-yellow-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-500">待我处理</div>
+                                <div class="text-2xl font-bold text-gray-900">5</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-500">本周完成</div>
+                                <div class="text-2xl font-bold text-gray-900">12</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-500">逾期任务</div>
+                                <div class="text-2xl font-bold text-gray-900">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 工作台详情 -->
+                <div class="bg-white rounded-xl card-shadow">
+                    <!-- 工作台标签导航 -->
+                    <div class="border-b border-gray-200">
+                        <div class="px-6 pt-4">
+                            <div class="flex space-x-0">
+                                <button class="workbench-tab px-4 py-3 text-primary font-medium border-b-2 border-primary bg-gradient-to-b from-blue-50 to-white" data-workbench-tab="approval">
+                                    待我审批 <span class="ml-1 bg-error text-white text-xs px-1.5 py-0.5 rounded-full">2</span>
+                                </button>
+                                <button class="workbench-tab px-4 py-3 text-gray-600 hover:text-primary" data-workbench-tab="pending">
+                                    待我处理 <span class="ml-1 bg-warning text-white text-xs px-1.5 py-0.5 rounded-full">5</span>
+                                </button>
+                                <button class="workbench-tab px-4 py-3 text-gray-600 hover:text-primary" data-workbench-tab="completed">
+                                    已完成
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 工作台内容区域 -->
+                    <div class="p-6">
+                        <!-- 待我审批 -->
+                        <div id="approval-workbench-panel" class="workbench-panel">
+                            <div class="space-y-4">
+                                <!-- 筛选和搜索 -->
+                                <div class="flex justify-between items-center mb-6">
+                                    <div class="flex space-x-4">
+                                        <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                            <option>全部类型</option>
+                                            <option>数据使用申请</option>
+                                            <option>核心资产认定</option>
+                                            <option>权限申请</option>
+                                        </select>
+                                    </div>
+                                    <div class="relative">
+                                        <input type="text" placeholder="搜索申请..." 
+                                               class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-64">
+                                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <!-- 审批列表 -->
+                                <div class="space-y-3">
+                                    <div class="border border-red-200 bg-red-50 rounded-lg p-4 hover:bg-red-100 transition-colors cursor-pointer" onclick="viewApprovalDetail('APP001')">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center space-x-4">
+                                                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-file-alt text-red-600"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <h4 class="font-medium text-gray-900">数据使用申请</h4>
+                                                    <p class="text-sm text-gray-600">申请使用销售数据进行客户分析</p>
+                                                    <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                                        <span><i class="fas fa-user mr-1"></i>申请人: 李四</span>
+                                                        <span><i class="fas fa-calendar mr-1"></i>申请时间: 2024-06-24 14:30</span>
+                                                        <span><i class="fas fa-database mr-1"></i>涉及表: ods_sales_order, dim_customer</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <div class="flex space-x-2">
+                                                    <button class="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600">
+                                                        <i class="fas fa-check mr-1"></i>通过
+                                                    </button>
+                                                    <button class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">
+                                                        <i class="fas fa-times mr-1"></i>拒绝
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="border border-gray-200 bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors cursor-pointer" onclick="viewApprovalDetail('APP002')">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center space-x-4">
+                                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-star text-blue-600"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <h4 class="font-medium text-gray-900">核心资产认定申请</h4>
+                                                    <p class="text-sm text-gray-600">申请将 ods_user_behavior 认定为核心资产</p>
+                                                    <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                                        <span><i class="fas fa-user mr-1"></i>申请人: 王五</span>
+                                                        <span><i class="fas fa-calendar mr-1"></i>申请时间: 2024-06-23 16:45</span>
+                                                        <span><i class="fas fa-table mr-1"></i>涉及表: ods_user_behavior</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <div class="flex space-x-2">
+                                                    <button class="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600">
+                                                        <i class="fas fa-check mr-1"></i>通过
+                                                    </button>
+                                                    <button class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">
+                                                        <i class="fas fa-times mr-1"></i>拒绝
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 待我处理 -->
+                        <div id="pending-workbench-panel" class="workbench-panel hidden">
+                            <div class="space-y-4">
+                                <!-- 筛选和搜索 -->
+                                <div class="flex justify-between items-center mb-6">
+                                    <div class="flex space-x-4">
+                                        <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                            <option>全部类型</option>
+                                            <option>数据质量问题</option>
+                                            <option>同步任务</option>
+                                            <option>监控告警</option>
+                                        </select>
+                                        <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                            <option>全部状态</option>
+                                            <option>待处理</option>
+                                            <option>进行中</option>
+                                            <option>已暂停</option>
+                                        </select>
+                                    </div>
+                                    <div class="relative">
+                                        <input type="text" placeholder="搜索任务..." 
+                                               class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-64">
+                                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <!-- 任务列表 -->
+                                <div class="space-y-3">
+                                    <div class="border border-yellow-200 bg-yellow-50 rounded-lg p-4 hover:bg-yellow-100 transition-colors cursor-pointer">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center space-x-4">
+                                                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <h4 class="font-medium text-gray-900">数据质量异常</h4>
+                                                    <p class="text-sm text-gray-600">ods_sales_order 表检测到数据质量问题</p>
+                                                    <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                                        <span><i class="fas fa-table mr-1"></i>表: ods_sales_order</span>
+                                                        <span><i class="fas fa-bug mr-1"></i>问题: 空值率异常</span>
+                                                        <span><i class="fas fa-clock mr-1"></i>发现时间: 30分钟前</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">待处理</span>
+                                                <button class="bg-primary text-white px-3 py-1 rounded text-xs hover:bg-blue-600">
+                                                    <i class="fas fa-wrench mr-1"></i>处理
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="border border-green-200 bg-green-50 rounded-lg p-4 hover:bg-green-100 transition-colors cursor-pointer">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center space-x-4">
+                                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-sync text-green-600"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <h4 class="font-medium text-gray-900">数据同步任务配置</h4>
+                                                    <p class="text-sm text-gray-600">daily_sync_job 同步任务需要更新配置</p>
+                                                    <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                                        <span><i class="fas fa-cog mr-1"></i>任务: daily_sync_job</span>
+                                                        <span><i class="fas fa-database mr-1"></i>源表: 5张表</span>
+                                                        <span><i class="fas fa-clock mr-1"></i>创建时间: 2小时前</span>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <div class="flex items-center space-x-2">
+                                                            <div class="w-48 bg-gray-200 rounded-full h-2">
+                                                                <div class="bg-green-600 h-2 rounded-full" style="width: 65%"></div>
+                                                            </div>
+                                                            <span class="text-xs text-gray-500">65%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">进行中</span>
+                                                <button class="bg-primary text-white px-3 py-1 rounded text-xs hover:bg-blue-600">
+                                                    <i class="fas fa-eye mr-1"></i>查看
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="border border-gray-200 bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors cursor-pointer">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center space-x-4">
+                                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-chart-line text-blue-600"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <h4 class="font-medium text-gray-900">监控告警配置</h4>
+                                                    <p class="text-sm text-gray-600">需要为新接入的数据表配置监控规则</p>
+                                                    <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                                        <span><i class="fas fa-table mr-1"></i>新表: 3张</span>
+                                                        <span><i class="fas fa-bell mr-1"></i>规则: 待配置</span>
+                                                        <span><i class="fas fa-clock mr-1"></i>创建时间: 1天前</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">待开始</span>
+                                                <button class="bg-primary text-white px-3 py-1 rounded text-xs hover:bg-blue-600">
+                                                    <i class="fas fa-play mr-1"></i>开始
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 更多任务提示 -->
+                                    <div class="text-center py-4">
+                                        <button class="text-primary hover:text-blue-600 text-sm">
+                                            查看更多任务 (还有2项)
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 已完成 -->
+                        <div id="completed-workbench-panel" class="workbench-panel hidden">
+                            <div class="space-y-4">
+                                <!-- 筛选选项 -->
+                                <div class="flex justify-between items-center mb-6">
+                                    <div class="flex space-x-4">
+                                        <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                            <option>最近7天</option>
+                                            <option>最近30天</option>
+                                            <option>最近3个月</option>
+                                        </select>
+                                        <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                            <option>全部类型</option>
+                                            <option>审批任务</option>
+                                            <option>处理任务</option>
+                                        </select>
+                                    </div>
+                                    <div class="relative">
+                                        <input type="text" placeholder="搜索已完成..." 
+                                               class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-64">
+                                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <!-- 已完成列表 -->
+                                <div class="space-y-3">
+                                    <div class="border border-gray-200 bg-white rounded-lg p-4">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center space-x-4">
+                                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-check text-green-600"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <h4 class="font-medium text-gray-900">数据使用申请审批</h4>
+                                                    <p class="text-sm text-gray-600">已通过赵六的数据使用申请</p>
+                                                    <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                                        <span><i class="fas fa-user mr-1"></i>申请人: 赵六</span>
+                                                        <span><i class="fas fa-check mr-1"></i>审批结果: 通过</span>
+                                                        <span><i class="fas fa-calendar mr-1"></i>完成时间: 2024-06-23 15:30</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">已完成</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="border border-gray-200 bg-white rounded-lg p-4">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center space-x-4">
+                                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-wrench text-green-600"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <h4 class="font-medium text-gray-900">数据质量问题修复</h4>
+                                                    <p class="text-sm text-gray-600">已修复 dim_product 表的数据质量问题</p>
+                                                    <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                                        <span><i class="fas fa-table mr-1"></i>表: dim_product</span>
+                                                        <span><i class="fas fa-bug mr-1"></i>问题类型: 重复数据</span>
+                                                        <span><i class="fas fa-calendar mr-1"></i>完成时间: 2024-06-22 11:45</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">已完成</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 更多记录 -->
+                                    <div class="text-center py-4">
+                                        <button class="text-primary hover:text-blue-600 text-sm">
+                                            加载更多记录
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 个人信息面板 -->
+            <div id="info-panel" class="profile-panel hidden">
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-6">个人信息</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">姓名</label>
+                            <input type="text" value="张三" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">工号</label>
+                            <input type="text" value="EMP001" class="w-full border border-gray-300 rounded-lg px-3 py-2" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">邮箱</label>
+                            <input type="email" value="zhangsan@company.com" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">手机号</label>
+                            <input type="tel" value="186****8888" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">部门</label>
+                            <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                <option>技术部</option>
+                                <option>产品部</option>
+                                <option>运营部</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">职位</label>
+                            <input type="text" value="系统管理员" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">取消</button>
+                        <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark">保存</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 安全设置面板 -->
+            <div id="security-panel" class="profile-panel hidden">
+                <div class="space-y-6">
+                    <!-- 密码修改 -->
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">密码修改</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">当前密码</label>
+                                <input type="password" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">新密码</label>
+                                <input type="password" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">确认新密码</label>
+                                <input type="password" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark">
+                                修改密码
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 登录记录 -->
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">最近登录记录</h3>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <div class="font-medium">Windows Chrome</div>
+                                    <div class="text-sm text-gray-500">IP: 192.168.1.100</div>
+                                </div>
+                                <div class="text-sm text-gray-500">2024-06-24 09:30</div>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <div class="font-medium">Mac Safari</div>
+                                    <div class="text-sm text-gray-500">IP: 192.168.1.101</div>
+                                </div>
+                                <div class="text-sm text-gray-500">2024-06-23 18:45</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 活动记录面板 -->
+            <div id="activity-panel" class="profile-panel hidden">
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-6">活动记录</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-4 p-4 border-l-4 border-blue-500 bg-blue-50 rounded-lg">
+                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mt-1">
+                                <i class="fas fa-check text-white text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium">审批通过数据使用申请</div>
+                                <div class="text-sm text-gray-600">批准了赵六的销售数据使用申请</div>
+                                <div class="text-xs text-gray-500 mt-1">2024-06-24 14:30</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4 p-4 border-l-4 border-green-500 bg-green-50 rounded-lg">
+                            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mt-1">
+                                <i class="fas fa-wrench text-white text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium">修复数据质量问题</div>
+                                <div class="text-sm text-gray-600">处理了 dim_product 表的重复数据问题</div>
+                                <div class="text-xs text-gray-500 mt-1">2024-06-23 16:20</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4 p-4 border-l-4 border-yellow-500 bg-yellow-50 rounded-lg">
+                            <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center mt-1">
+                                <i class="fas fa-star text-white text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium">核心资产认定</div>
+                                <div class="text-sm text-gray-600">将 ods_sales_order 认定为核心数据资产</div>
+                                <div class="text-xs text-gray-500 mt-1">2024-06-23 11:15</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-6">
+                        <button class="text-primary hover:text-blue-600 text-sm">
+                            查看更多活动记录
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 主标签切换功能
+        function switchProfileTab(tabName) {
+            // 隐藏所有面板
+            document.querySelectorAll('.profile-panel').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            
+            // 重置所有标签样式
+            document.querySelectorAll('.profile-tab').forEach(button => {
+                button.className = 'profile-tab px-4 py-3 text-gray-600 hover:text-primary';
+            });
+            
+            // 显示选中的面板
+            const targetPanel = document.getElementById(tabName + '-panel');
+            if (targetPanel) {
+                targetPanel.classList.remove('hidden');
+            }
+            
+            // 激活选中的标签
+            const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
+            if (activeButton) {
+                activeButton.className = 'profile-tab px-4 py-3 text-primary font-medium border-b-2 border-primary bg-gradient-to-b from-blue-50 to-white';
+            }
+        }
+
+        // 工作台标签切换功能
+        function switchWorkbenchTab(tabName) {
+            // 隐藏所有工作台面板
+            document.querySelectorAll('.workbench-panel').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            
+            // 重置所有工作台标签样式
+            document.querySelectorAll('.workbench-tab').forEach(button => {
+                button.className = 'workbench-tab px-4 py-3 text-gray-600 hover:text-primary';
+            });
+            
+            // 显示选中的工作台面板
+            const targetPanel = document.getElementById(tabName + '-workbench-panel');
+            if (targetPanel) {
+                targetPanel.classList.remove('hidden');
+            }
+            
+            // 激活选中的工作台标签
+            const activeButton = document.querySelector(`[data-workbench-tab="${tabName}"]`);
+            if (activeButton) {
+                activeButton.className = 'workbench-tab px-4 py-3 text-primary font-medium border-b-2 border-primary bg-gradient-to-b from-blue-50 to-white';
+            }
+        }
+
+        // 返回首页
+        function goBack() {
+            window.history.back();
+        }
+
+        // 查看审批详情
+        function viewApprovalDetail(id) {
+            console.log('查看审批详情:', id);
+            // 这里可以跳转到详细页面或显示模态框
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 绑定主标签按钮事件
+            document.querySelectorAll('.profile-tab').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    switchProfileTab(tabName);
+                });
+            });
+
+            // 绑定工作台标签按钮事件
+            document.querySelectorAll('.workbench-tab').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-workbench-tab');
+                    switchWorkbenchTab(tabName);
+                });
+            });
+        });
+
+        const employeeData = {
+            'EMP001': {
+                id: 'EMP001',
+                name: '张三',
+                avatar: '张',
+                position: '系统管理员',
+                department: '技术部',
+                email: 'zhangsan@company.com',
+                phone: '186****8888',
+                manager: '王总'
+            },
+            'EMP002': {
+                id: 'EMP002',
+                name: '李四',
+                avatar: '李',
+                position: '数据分析师',
+                department: '业务部',
+                email: 'lisi@company.com',
+                phone: '138****5678',
+                manager: '赵六'
+            },
+            'EMP003': {
+                id: 'EMP003',
+                name: '王五',
+                avatar: '王',
+                position: '产品经理',
+                department: '产品部',
+                email: 'wangwu@company.com',
+                phone: '139****9999',
+                manager: '赵六'
+            },
+            'EMP004': {
+                id: 'EMP004',
+                name: '赵六',
+                avatar: '赵',
+                position: '副总经理',
+                department: '管理层',
+                email: 'zhaoliu@company.com',
+                phone: '188****1234',
+                manager: '王总'
+            }
+        };
+
+        // 模拟的审批申请数据
+        const approvalData = {
+            'APP001': {
+                id: 'APP001',
+                type: 'data_usage',
+                title: '数据使用申请',
+                // description: '申请使用销售数据进行客户分析和业务洞察',
+                applicantId: 'EMP002',
+                applyTime: '2024-06-24 14:30',
+                // priority: 'urgent',
+                status: 'pending',
+                purpose: '需要使用销售数据进行客户行为分析，识别高价值客户群体，制定精准营销策略。预计分析周期为3个月，结果将用于Q3季度的营销活动规划。',
+                tables: [
+                    {
+                        name: 'ods_sales_order',
+                        description: '销售订单原始数据表',
+                        isCore: true,
+                        permission: 'view'
+                    },
+                    {
+                        name: 'dim_customer',
+                        description: '客户维度表',
+                        isCore: false,
+                        permission: 'view'
+                    }
+                ],
+                duration: '2024-06-24 至 2024-09-24 (3个月)',
+                riskLevel: {
+                    sensitivity: 'high',
+                    usage: 'medium',
+                    leakage: 'low'
+                }
+            },
+            'APP002': {
+                id: 'APP002',
+                type: 'core_asset',
+                title: '核心资产认定申请',
+                // description: '申请将 ods_user_behavior 认定为核心资产',
+                applicantId: 'EMP003',
+                applyTime: '2024-06-23 16:45',
+                // priority: 'normal',
+                status: 'pending',
+                purpose: '基于业务重要性评估，ods_user_behavior表在用户行为分析、个性化推荐等核心业务场景中发挥关键作用，建议认定为核心数据资产。',
+                tables: [
+                    {
+                        name: 'ods_user_behavior',
+                        description: '用户行为原始数据表',
+                        isCore: false,
+                        permission: 'manage'
+                    }
+                ],
+                riskLevel: {
+                    sensitivity: 'medium',
+                    usage: 'low',
+                    leakage: 'low'
+                }
+            }
+        };
+
+        // 查看审批详情
+        function viewApprovalDetail(approvalId) {
+            const approval = approvalData[approvalId];
+            const applicant = employeeData[approval.applicantId];
+            
+            if (!approval || !applicant) {
+                console.error('未找到审批或申请人数据');
+                return;
+            }
+            
+            // 填充基本信息
+            document.getElementById('approval-title').textContent = approval.title;
+            document.getElementById('approval-description').textContent = approval.description;
+            document.getElementById('approval-time').textContent = approval.applyTime;
+            
+            // 设置优先级
+            // const priorityElement = document.getElementById('approval-priority');
+            // if (approval.priority === 'urgent') {
+            //     priorityElement.className = 'px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full';
+            //     priorityElement.textContent = '紧急';
+            // } else {
+            //     priorityElement.className = 'px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full';
+            //     priorityElement.textContent = '普通';
+            // }
+            
+            // 设置图标
+            const iconElement = document.getElementById('approval-icon');
+            if (approval.type === 'data_usage') {
+                iconElement.className = 'fas fa-file-alt text-blue-600 text-2xl';
+            } else if (approval.type === 'core_asset') {
+                iconElement.className = 'fas fa-star text-blue-600 text-2xl';
+            }
+            
+            // 填充申请人信息
+            document.getElementById('applicant-avatar').textContent = applicant.avatar;
+            document.getElementById('applicant-name').textContent = applicant.name;
+            document.getElementById('applicant-position').textContent = applicant.position;
+            document.getElementById('applicant-id').textContent = applicant.id;
+            document.getElementById('applicant-department').textContent = applicant.department;
+            document.getElementById('applicant-email').textContent = applicant.email;
+            document.getElementById('applicant-phone').textContent = applicant.phone;
+            document.getElementById('applicant-manager').textContent = applicant.manager;
+            
+            // 填充申请详情
+            document.getElementById('request-type').textContent = approval.title;
+            document.getElementById('request-purpose').textContent = approval.purpose;
+            
+            // 填充数据表信息
+            const tablesContainer = document.getElementById('request-tables');
+            tablesContainer.innerHTML = '';
+            approval.tables.forEach(table => {
+                const tableDiv = document.createElement('div');
+                tableDiv.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
+                tableDiv.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-table text-blue-600"></i>
+                        <div>
+                            <div class="font-medium text-gray-900">${table.name}</div>
+                            <div class="text-xs text-gray-500">${table.description}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-1 text-xs ${table.isCore ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'} rounded-full">
+                            ${table.isCore ? '<i class="fas fa-star mr-1"></i>核心' : '普通'}
+                        </span>
+                        <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                            ${table.permission === 'view' ? '查看权限' : table.permission === 'edit' ? '编辑权限' : '管理权限'}
+                        </span>
+                    </div>
+                `;
+                tablesContainer.appendChild(tableDiv);
+            });
+            
+            // 填充使用期限（如果是数据使用申请）
+            if (approval.duration) {
+                document.getElementById('request-duration').textContent = approval.duration;
+                document.getElementById('request-duration').parentElement.style.display = 'block';
+            } else {
+                document.getElementById('request-duration').parentElement.style.display = 'none';
+            }
+            
+            // 显示模态框
+            document.getElementById('approvalDetailModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭审批详情
+        function closeApprovalDetail() {
+            document.getElementById('approvalDetailModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            
+            // 清空表单
+            document.querySelectorAll('input[name="approval_decision"]').forEach(radio => {
+                radio.checked = false;
+            });
+            document.getElementById('approval-comment').value = '';
+        }
+
+        // 提交审批
+        function submitApproval() {
+            const decision = document.querySelector('input[name="approval_decision"]:checked')?.value;
+            const comment = document.getElementById('approval-comment').value.trim();
+            
+            if (!decision) {
+                alert('请选择审批决定');
+                return;
+            }
+            
+            if (!comment) {
+                alert('请填写审批意见');
+                return;
+            }
+            
+            // 模拟提交审批
+            const approvalResult = {
+                decision: decision,
+                comment: comment,
+                approver: '张三',
+                approveTime: new Date().toLocaleString('zh-CN')
+            };
+            
+            console.log('审批结果:', approvalResult);
+            
+            // 显示成功提示
+            if (decision === 'approve') {
+                alert('审批通过！申请已批准。');
+            } else {
+                alert('审批拒绝！申请已被拒绝。');
+            }
+            
+            // 关闭模态框
+            closeApprovalDetail();
+            
+            // 可以在这里更新待审批列表，移除已处理的项目
+            // updateApprovalList();
+        }
+
+        // 模态框外部点击关闭
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('approvalDetailModal');
+            if (e.target === modal) {
+                closeApprovalDetail();
+            }
+        });
+
+        // ESC键关闭
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeApprovalDetail();
+            }
+        });
+
+    </script>
+
+    <!-- 审批详情模态框 -->
+    <div id="approvalDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                <!-- 模态框头部 -->
+                <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-semibold text-gray-900">审批详情</h2>
+                        <button onclick="closeApprovalDetail()" class="text-gray-400 hover:text-gray-600 text-xl">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 模态框内容 -->
+                <div class="p-6">
+                    <!-- 申请基本信息 -->
+                    <div class="bg-blue-50 rounded-lg p-6 mb-6">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i id="approval-icon" class="fas fa-file-alt text-blue-600 text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 id="approval-title" class="text-xl font-semibold text-gray-900 mb-2">数据使用申请</h3>
+                                    <p id="approval-description" class="text-gray-600 mb-3">申请使用销售数据进行客户分析和业务洞察</p>
+                                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                        <span><i class="fas fa-calendar mr-1"></i>申请时间: <span id="approval-time">2024-06-24 14:30</span></span>
+                                        <!-- <span id="approval-priority" class="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">紧急</span> -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="approval-status" class="px-3 py-1 text-sm bg-yellow-100 text-yellow-800 rounded-full">
+                                待审批
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- 左侧：申请人信息 -->
+                        <div class="lg:col-span-1">
+                            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4">申请人信息</h4>
+                                
+                                <!-- 申请人头像和基本信息 -->
+                                <div class="flex items-center space-x-4 mb-6">
+                                    <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+                                        <span id="applicant-avatar" class="text-white text-xl font-bold">李</span>
+                                    </div>
+                                    <div>
+                                        <h5 id="applicant-name" class="text-lg font-medium text-gray-900">李四</h5>
+                                        <p id="applicant-position" class="text-sm text-gray-500">数据分析师</p>
+                                    </div>
+                                </div>
+
+                                <!-- 详细信息 -->
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                        <span class="text-sm font-medium text-gray-700">员工编号:</span>
+                                        <span id="applicant-id" class="text-sm text-gray-600">EMP002</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                        <span class="text-sm font-medium text-gray-700">所属部门:</span>
+                                        <span id="applicant-department" class="text-sm text-gray-600">业务部</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                        <span class="text-sm font-medium text-gray-700">联系邮箱:</span>
+                                        <span id="applicant-email" class="text-sm text-gray-600">lisi@company.com</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                        <span class="text-sm font-medium text-gray-700">联系电话:</span>
+                                        <span id="applicant-phone" class="text-sm text-gray-600">138****5678</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2">
+                                        <span class="text-sm font-medium text-gray-700">直接主管:</span>
+                                        <span id="applicant-manager" class="text-sm text-gray-600">赵六</span>
+                                    </div>
+                                </div>
+
+                                <!-- 联系申请人 -->
+                                <div class="mt-6 space-y-2">
+                                    <button class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm">
+                                        <i class="fas fa-envelope mr-2"></i>发送邮件
+                                    </button>
+                                    <button class="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm">
+                                        <i class="fas fa-phone mr-2"></i>电话沟通
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右侧：申请详情 -->
+                        <div class="lg:col-span-2">
+                            <div class="space-y-6">
+                                <!-- 申请内容 -->
+                                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                                    <h4 class="text-lg font-semibold text-gray-900 mb-4">申请详情</h4>
+                                    
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">申请类型</label>
+                                            <span id="request-type" class="text-sm text-gray-900">数据使用申请</span>
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">使用目的</label>
+                                            <p id="request-purpose" class="text-sm text-gray-900 bg-gray-50 p-3 rounded-lg">
+                                                需要使用销售数据进行客户行为分析，识别高价值客户群体，制定精准营销策略。
+                                                预计分析周期为3个月，结果将用于Q3季度的营销活动规划。
+                                            </p>
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">申请的数据表</label>
+                                            <div id="request-tables" class="space-y-2">
+                                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                    <div class="flex items-center space-x-3">
+                                                        <i class="fas fa-table text-blue-600"></i>
+                                                        <div>
+                                                            <div class="font-medium text-gray-900">ods_sales_order</div>
+                                                            <div class="text-xs text-gray-500">销售订单原始数据表</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex items-center space-x-2">
+                                                        <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                                            <i class="fas fa-star mr-1"></i>核心
+                                                        </span>
+                                                        <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">查看权限</span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                    <div class="flex items-center space-x-3">
+                                                        <i class="fas fa-table text-blue-600"></i>
+                                                        <div>
+                                                            <div class="font-medium text-gray-900">dim_customer</div>
+                                                            <div class="text-xs text-gray-500">客户维度表</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex items-center space-x-2">
+                                                        <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">普通</span>
+                                                        <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">查看权限</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">使用期限</label>
+                                            <span id="request-duration" class="text-sm text-gray-900">2024-06-24 至 2024-09-24 (3个月)</span>
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">数据安全承诺</label>
+                                            <div id="security-commitment" class="space-y-2">
+                                                <div class="flex items-center space-x-2 text-sm text-gray-700">
+                                                    <i class="fas fa-check-circle text-green-600"></i>
+                                                    <span>遵守公司数据安全管理规定</span>
+                                                </div>
+                                                <div class="flex items-center space-x-2 text-sm text-gray-700">
+                                                    <i class="fas fa-check-circle text-green-600"></i>
+                                                    <span>不将数据用于授权范围外的用途</span>
+                                                </div>
+                                                <div class="flex items-center space-x-2 text-sm text-gray-700">
+                                                    <i class="fas fa-check-circle text-green-600"></i>
+                                                    <span>使用完毕后及时清理本地数据</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 审批流程 -->
+                                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                                    <h4 class="text-lg font-semibold text-gray-900 mb-4">审批流程</h4>
+                                    
+                                    <div class="space-y-4">
+                                        <div class="flex items-center space-x-4 p-3 bg-green-50 rounded-lg">
+                                            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-check text-white text-sm"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="font-medium text-gray-900">申请提交</div>
+                                                <div class="text-sm text-gray-500">李四 提交申请</div>
+                                            </div>
+                                            <div class="text-sm text-gray-500">2024-06-24 14:30</div>
+                                        </div>
+                                        
+                                        <div class="flex items-center space-x-4 p-3 bg-yellow-50 rounded-lg">
+                                            <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-clock text-white text-sm"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="font-medium text-gray-900">待部门负责人审批</div>
+                                                <div class="text-sm text-gray-500">当前审批人: 张三 (技术部负责人)</div>
+                                            </div>
+                                            <div class="text-sm text-gray-500">进行中</div>
+                                        </div>
+                                        
+                                        <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg opacity-60">
+                                            <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-hourglass text-white text-sm"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="font-medium text-gray-900">数据管理员确认</div>
+                                                <div class="text-sm text-gray-500">等待前序审批完成</div>
+                                            </div>
+                                            <div class="text-sm text-gray-500">待进行</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 风险评估 -->
+                                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                                    <h4 class="text-lg font-semibold text-gray-900 mb-4">风险评估</h4>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div class="text-center p-4 bg-red-50 rounded-lg">
+                                            <div class="text-2xl font-bold text-red-600">高</div>
+                                            <div class="text-sm text-gray-600">数据敏感度</div>
+                                        </div>
+                                        <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                                            <div class="text-2xl font-bold text-yellow-600">中</div>
+                                            <div class="text-sm text-gray-600">使用风险</div>
+                                        </div>
+                                        <div class="text-center p-4 bg-green-50 rounded-lg">
+                                            <div class="text-2xl font-bold text-green-600">低</div>
+                                            <div class="text-sm text-gray-600">泄露风险</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                        <div class="flex items-start space-x-2">
+                                            <i class="fas fa-exclamation-triangle text-yellow-600 mt-1"></i>
+                                            <div>
+                                                <div class="font-medium text-yellow-800">注意事项</div>
+                                                <div class="text-sm text-yellow-700 mt-1">
+                                                    该申请涉及核心销售数据，建议增加使用监控和定期审查机制。
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 审批操作区域 -->
+                    <div class="mt-8 border-t border-gray-200 pt-6">
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">审批决定</h4>
+                            
+                            <!-- 审批选项 -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <label class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-white cursor-pointer">
+                                    <input type="radio" name="approval_decision" value="approve" class="mr-3">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-check text-green-600"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-gray-900">通过申请</div>
+                                            <div class="text-sm text-gray-500">批准申请人使用所申请的数据</div>
+                                        </div>
+                                    </div>
+                                </label>
+                                
+                                <label class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-white cursor-pointer">
+                                    <input type="radio" name="approval_decision" value="reject" class="mr-3">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-times text-red-600"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-gray-900">拒绝申请</div>
+                                            <div class="text-sm text-gray-500">不批准此次申请</div>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <!-- 审批意见 -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">审批意见</label>
+                                <textarea 
+                                    id="approval-comment" 
+                                    rows="3" 
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="请输入审批意见...">
+                                </textarea>
+                            </div>
+                            
+                            <!-- 操作按钮 -->
+                            <div class="flex justify-end space-x-3">
+                                <button onclick="closeApprovalDetail()" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600">
+                                    取消
+                                </button>
+                                <button onclick="submitApproval()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+                                    提交审批
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
